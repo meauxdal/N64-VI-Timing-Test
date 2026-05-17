@@ -17,24 +17,65 @@
 // when LEAP_A = LEAP_B = H_TOTAL (no leap correction applied).
 // ---------------------------------------------------------------------------
 
-// NTSC: fVI = 535500000/11 Hz (~48.68 MHz), S=526 progressive
+// NTSC progressive: fVI = 535500000/11 Hz (~48.68 MHz), S=526
 #define FVI_NUM  535500000LL
 #define FVI_DEN  11LL
 #define VI_S     526
 
-// MPAL: fVI = 6953850000/143 Hz (~48.63 MHz), S=526 progressive
-//#define FVI_NUM  6953850000LL
-//#define FVI_DEN  143LL
-//#define VI_S     526
+// NTSC interlaced: fVI = 535500000/11 Hz (~48.68 MHz), S=525
+//#define FVI_NUM  535500000LL
+//#define FVI_DEN  11LL
+//#define VI_S     525
 
-// PAL: fVI = 49656530 Hz (~49.66 MHz), S=626 progressive
+// ---------------------------------------------------------------------------
+
+// PAL progressive: fVI = 49656530 Hz (~49.66 MHz), S=626
+//#define FVI_NUM  49656530LL
+//#define FVI_DEN  1LL
+//#define VI_S     626
+
+// PAL interlaced: fVI = 49656530 Hz (~49.66 MHz), S=625
 //#define FVI_NUM  49656530LL
 //#define FVI_DEN  1LL
 //#define VI_S     626
 
 // ---------------------------------------------------------------------------
+
+// MPAL progressive: fVI = 6953850000/143 Hz (~48.63 MHz), S=526
+//#define FVI_NUM  6953850000LL
+//#define FVI_DEN  143LL
+//#define VI_S     526
+
+// MPAL interlaced: fVI = 6953850000/143 Hz (~48.63 MHz), S=525
+//#define FVI_NUM  6953850000LL
+//#define FVI_DEN  143LL
+//#define VI_S     525
+
+// ---------------------------------------------------------------------------
 // Default VI timing values.
 // Uncomment one block. Must match FVI/VI_S region above.
+// ---------------------------------------------------------------------------
+
+// NTSC
+#define DEFAULT_H_TOTAL     3094
+#define DEFAULT_LEAP_PAT    0
+#define DEFAULT_LEAP_A      3094
+#define DEFAULT_LEAP_B      3094
+
+// ---------------------------------------------------------------------------
+
+// PAL (libdragon / 1996)
+//#define DEFAULT_H_TOTAL     3178
+//#define DEFAULT_LEAP_PAT    21
+//#define DEFAULT_LEAP_A      3183
+//#define DEFAULT_LEAP_B      3184
+
+// PAL (1997)
+//#define DEFAULT_H_TOTAL     3178
+//#define DEFAULT_LEAP_PAT    23
+//#define DEFAULT_LEAP_A      3182
+//#define DEFAULT_LEAP_B      3184
+
 // ---------------------------------------------------------------------------
 
 // MPAL progressive (Math/lidnariq)
@@ -56,31 +97,10 @@
 //#define DEFAULT_LEAP_B      3101
 
 // ---------------------------------------------------------------------------
-
-// NTSC
-#define DEFAULT_H_TOTAL     3094
-#define DEFAULT_LEAP_PAT    0
-#define DEFAULT_LEAP_A      3094
-#define DEFAULT_LEAP_B      3094
-
-// PAL (libdragon / 1996)
-//#define DEFAULT_H_TOTAL     3178
-//#define DEFAULT_LEAP_PAT    21
-//#define DEFAULT_LEAP_A      3183
-//#define DEFAULT_LEAP_B      3184
-
-// PAL (1997)
-//#define DEFAULT_H_TOTAL     3178
-//#define DEFAULT_LEAP_PAT    23
-//#define DEFAULT_LEAP_A      3182
-//#define DEFAULT_LEAP_B      3184
-
-// ---------------------------------------------------------------------------
 // Write VI timing registers directly to hardware.
 // VI_H_TOTAL:      bits 20:16 = 5-bit leap pattern, bits 11:0 = h_total-1
 // VI_H_TOTAL_LEAP: bits 27:16 = leap_a-1, bits 11:0 = leap_b-1
-// LEAP_A and LEAP_B are clamped to >= h_total (per wiki: values smaller
-// than H_TOTAL cause undesired side effects including skipped hsyncs).
+// LEAP_A and LEAP_B are clamped to >= h_total 
 // ---------------------------------------------------------------------------
 static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b)
 {
@@ -177,14 +197,14 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     int y = SAFE_Y;
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
-    snprintf(buf, sizeof(buf), "     VI TIMING TEST");
+    snprintf(buf, sizeof(buf), "VI TIMING TEST");
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     H_TOTAL:  %d  ~%d.%02d Hz",
+    snprintf(buf, sizeof(buf), "H_TOTAL:  %d  ~%d.%02d Hz",
              h_total, t.fh_int, t.fh_frac);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     LEAP PAT: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "LEAP PAT: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -193,21 +213,21 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
         (pat >> 0) & 1 ? '1' : '0');
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     LEAP_A:   %d  dA: +%d", leap_a, t.delta_a);
+    snprintf(buf, sizeof(buf), "LEAP_A:   %d  dA: +%d", leap_a, t.delta_a);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     LEAP_B:   %d  dB: +%d", leap_b, t.delta_b);
+    snprintf(buf, sizeof(buf), "LEAP_B:   %d  dB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     avg/VSYNC: %d.%d clk  ~fV: %d.%02d Hz",
+    snprintf(buf, sizeof(buf), "avg/VSYNC: %d.%d clk  ~fV: %d.%02d Hz",
              t.avg_whole, t.avg_tenths, t.fv_int, t.fv_frac);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 16;
 
     graphics_set_color(graphics_make_color(0, 0, 0, 180), 0);
-    snprintf(buf, sizeof(buf), "     REG H_TOTAL:  0x%08lX", (unsigned long)reg_ht);
+    snprintf(buf, sizeof(buf), "REG H_TOTAL:  0x%08lX", (unsigned long)reg_ht);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     REG LEAP:     0x%08lX", (unsigned long)reg_leap);
+    snprintf(buf, sizeof(buf), "REG LEAP:     0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, SAFE_X, y, buf);
 
     snprintf(buf, sizeof(buf), "DPAD U/D: H_TOTAL   DPAD L/R: PAT");
