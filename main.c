@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <libdragon.h>
 
+// CRT safe area
+#define SAFE_X  20
+#define SAFE_Y  16
+
 // VI register addresses (uncached KSEG1)
 #define VI_BASE             0xA4400000
 #define VI_H_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x1C))
@@ -101,10 +105,10 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
     snprintf(buf, sizeof(buf), "     VI TIMING TEST");
-    graphics_draw_text(disp, 8, 8, buf);
+    graphics_draw_text(disp, SAFE_X, SAFE_Y + 0, buf);
 
     snprintf(buf, sizeof(buf), "     H_TOTAL:    %d", h_total);
-    graphics_draw_text(disp, 8, 24, buf);
+    graphics_draw_text(disp, SAFE_X, SAFE_Y + 16, buf);
 
     snprintf(buf, sizeof(buf), "     LEAP PAT:   %d (0b%c%c%c%c%c)",
         pat,
@@ -113,19 +117,19 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
         (pat >> 2) & 1 ? '1' : '0',
         (pat >> 1) & 1 ? '1' : '0',
         (pat >> 0) & 1 ? '1' : '0');
-    graphics_draw_text(disp, 8, 40, buf);
+    graphics_draw_text(disp, SAFE_X, SAFE_Y + 32, buf);
 
     snprintf(buf, sizeof(buf), "     LEAP_A:     %d", leap_a);
-    graphics_draw_text(disp, 8, 56, buf);
+    graphics_draw_text(disp, SAFE_X, SAFE_Y + 48, buf);
 
     snprintf(buf, sizeof(buf), "     LEAP_B:     %d", leap_b);
-    graphics_draw_text(disp, 8, 72, buf);
+    graphics_draw_text(disp, SAFE_X, SAFE_Y + 64, buf);
 
     graphics_set_color(graphics_make_color(0, 0, 0, 180), 0);
     snprintf(buf, sizeof(buf), "DPAD U/D: H_TOTAL   DPAD L/R: PAT");
-    graphics_draw_text(disp, 8, 210, buf);
+    graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 20, buf);
     snprintf(buf, sizeof(buf), "C U/D: LEAP_A       C L/R: LEAP_B");
-    graphics_draw_text(disp, 8, 222, buf);
+    graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 8,  buf);
 }
 
 // ---------------------------------------------------------------------------
