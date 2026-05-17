@@ -8,12 +8,16 @@ see https://github.com/DragonMinded/libdragon/issues/884 for more details.
 
 ---
 
-#### disclaimer 1: this was coded with some degree of LLM assistance. in particular, i got claude and chatgpt to build off my prior test ROMs (for audio interface and leap testing) to iterate something that could minimally build, boot, draw some graphics + debug OSD, and enable debug output. i mostly iterated on it myself once the initial functionality appeared to be working. it works on hardware (and ares) and does appear to change the values in question. i tested it via summercart 64 + NTSC on my own CRT. i started lowering the H_TOTAL register, and once the fV got low enough, the signal started visually degrading (manifesting as a "bend" at the top of the image). it recovered as i raised the value back up. register profiling indicates the appropriate values are being modified (printed onscreen and via debug).  my currently connected N64 is RGB modded, so i didn't really see any difference at all until it started to reach the boundaries of my CRT's capability to sync to it.
+#### disclaimer 1: this was coded with some degree of LLM assistance. in particular, i got claude and chatgpt to build off my prior test ROMs (for audio interface and leap testing) to iterate something that could minimally build, boot, draw some graphics + debug OSD, and enable debug output. i mostly iterated on it myself once the initial functionality appeared to be working. 
+
+---
+
+it works on hardware (and ares) and does appear to change the values in question. i tested it via summercart 64 + NTSC on my own CRT. i started lowering the H_TOTAL register, and once the fV got low enough, the signal started visually degrading (manifesting as a "bend" at the top of the image). it recovered as i raised the value back up. register profiling indicates the appropriate values are being modified (printed onscreen and via debug).  my currently connected N64 is RGB modded, so i didn't really see any difference at all until it started to reach the boundaries of my CRT's capability to sync to it.
 
 
 ---
 
-it works very similarly to my [calculator](https://meauxdal.neocities.org/n64-vi-calculator). you can adjust VI registers dynamically and see the results
+this tool works very similarly to my [vi timing calculator](https://meauxdal.neocities.org/n64-vi-calculator). you can adjust VI registers dynamically and see the results:
 
 - d-pad up & down: increases or decreases VI_H_TOTAL
 - d-pad right & left: increases or decreases the leap pattern (0-31)
@@ -28,11 +32,11 @@ LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore ne
 
 ---
 
-you _can_ also use L/R to switch between the number of half-lines, but i don't really recommend doing so at this point. 
+L/R switch between the number of half-lines to nominal progressive/interlaced values. the intent is to allow for interlaced testing, but more work probably needs to be done here. it _does_ produce interlaced timing values; however, _for now it should be considered untested._ these values are clamped to 526/525 for NTSC/MPAL, 626/625 for PAL.
 
 - L/R buttons: L = even/prog (default), R = odd/interlaced. 
 
-this is not true interlaced. SERRATE is not set, etc. it _does_ produce the interlaced timing values, though. _for now it should be considered untested._ these values are clamped to 526/525 for NTSC/MPAL, 626/625 for PAL.
+this is not true interlaced. SERRATE is not set, etc. 
 
 ---
 
@@ -44,7 +48,7 @@ mpal
 - **mpal_preview** - the old mpal interlaced-only profile. applies to both interlaced and progressive in libdragon preview
 
 ntsc
-- **ntsc** - needed to do this so i could confirm it works on my hardware
+- **ntsc**
 
 pal
 - **pal_1996** - original pal profile (libdragon)
@@ -60,4 +64,6 @@ other VI registers are not (intentionally) touched. SERRATE, BURST, etc. i only 
 
 ---
 
-currently using libdragon trunk because that's what my old test ROMs used.
+using libdragon trunk, in case that makes a difference (i don't think it does for this)
+
+
