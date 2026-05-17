@@ -100,7 +100,7 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
-    snprintf(buf, sizeof(buf), "MPAL VI TIMING TEST");
+    snprintf(buf, sizeof(buf), "VI TIMING TEST");
     graphics_draw_text(disp, 8, 8, buf);
 
     snprintf(buf, sizeof(buf), "H_TOTAL:    %d", h_total);
