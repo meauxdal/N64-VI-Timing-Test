@@ -1,8 +1,6 @@
-[![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg?branch=matrix)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
-
-[![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
-
 ## VI timing test ROM for N64
+
+matrix branch: [![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg?branch=matrix)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
 
 this tool allows adjusting VI timing values in real time to observe hardware effects. in particular, the initial goal is to be able to quickly iterate appropriate presets for MPAL
 
