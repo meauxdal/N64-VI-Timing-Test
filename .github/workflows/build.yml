@@ -10,8 +10,7 @@ jobs:
 
     env:
       N64_INST: /n64_toolchain
-      # Pinned libdragon trunk commit. Update this hash intentionally
-      # when you want to pick up libdragon changes.
+      # 
       LIBDRAGON_COMMIT: 7fee7254ef6b673a56c4bf6cc796fbb760173ab1
 
     steps:
