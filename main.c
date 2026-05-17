@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <libdragon.h>
 
-// CRT safe area
+// CRT safe area -------------------------------------------------------------
 #define SAFE_X  20
 #define SAFE_Y  16
 
-// VI register addresses (uncached KSEG1)
+// VI register addresses (uncached KSEG1) ------------------------------------
 #define VI_BASE                 0xA4400000
 #define REG_VI_V_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x18))
 #define REG_VI_H_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x1C))
@@ -13,6 +13,24 @@
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
+
+// populate preset string into overlay ---------------------------------------
+
+#if defined(PRESET_NTSC)
+#define PRESET_NAME "NTSC"
+#elif defined(PRESET_MPAL_MATH)
+#define PRESET_NAME "MPAL_MATH"
+#elif defined(PRESET_MPAL_OLD)
+#define PRESET_NAME "MPAL_OLD"
+#elif defined(PRESET_MPAL_PREVIEW)
+#define PRESET_NAME "MPAL_PREVIEW"
+#elif defined(PRESET_PAL_1996)
+#define PRESET_NAME "PAL_1996"
+#elif defined(PRESET_PAL_1997)
+#define PRESET_NAME "PAL_1997"
+#else
+#define PRESET_NAME "UNKNOWN"
+#endif
 
 // ---------------------------------------------------------------------------
 // Presets - select via make PRESET=<name>, e.g. make PRESET=MPAL_MATH
@@ -183,27 +201,27 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     int y = SAFE_Y;
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
-// text section
+// text section -------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", STR(PRESET));
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", PRESET_NAME);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "H_TOTAL:     %d", h_total);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    snprintf(buf, sizeof(buf), "H_TOTAL:      %d", h_total);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP PAT:    %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "LEAP PAT:     %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
         (pat >> 2) & 1 ? '1' : '0',
         (pat >> 1) & 1 ? '1' : '0',
         (pat >> 0) & 1 ? '1' : '0');
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
     snprintf(buf, sizeof(buf), "LEAP_A:       %d  deltaA: +%d", leap_a, t.delta_a);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
     snprintf(buf, sizeof(buf), "LEAP_B:       %d  deltaB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
@@ -214,34 +232,34 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 // ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "~fV:          %d.%02d Hz", t.fv_int, t.fv_frac);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
     
     snprintf(buf, sizeof(buf), "~fH:          %d.%02d Hz", t.fh_int, t.fh_frac);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 16;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 16;
 
 // ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "REG V_TOTAL:  0x%08lX", (unsigned long)reg_vt);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
     snprintf(buf, sizeof(buf), "REG H_TOTAL:  0x%08lX", (unsigned long)reg_ht);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
     snprintf(buf, sizeof(buf), "REG LEAP:     0x%08lX", (unsigned long)reg_leap);
-    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
 // ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "L/R - even/odd halflines (P/I)");
-    graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 32, buf);
+    graphics_draw_text(disp, SAFE_X + 16, 240 - SAFE_Y - 32, buf);
     snprintf(buf, sizeof(buf), "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
-    graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 20, buf);
+    graphics_draw_text(disp, SAFE_X + 16, 240 - SAFE_Y - 20, buf);
     snprintf(buf, sizeof(buf), "C U/D: LEAP_A      C L/R: LEAP_B");
-    graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 8, buf);
+    graphics_draw_text(disp, SAFE_X + 16, 240 - SAFE_Y - 8, buf);
 }
 
 // ---------------------------------------------------------------------------
-// Log current values and register readback to debug output.
+// debug output
 // ---------------------------------------------------------------------------
 static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 {
