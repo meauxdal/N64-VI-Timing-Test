@@ -204,7 +204,7 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 // text section -------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", PRESET_NAME);
-    graphics_draw_text(disp, SAFE_X + 54, y, buf); y += 16;
+    graphics_draw_text(disp, SAFE_X + 54, y, buf); y += 36;
 
 // ---------------------------------------------------------------------------
 
@@ -246,7 +246,7 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
     snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
-    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 16;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 20;
 
 // ---------------------------------------------------------------------------
 
