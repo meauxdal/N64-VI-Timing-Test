@@ -1,3 +1,7 @@
+[![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg?branch=matrix)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
+
+[![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
+
 ## VI timing test ROM for N64
 
 this tool allows adjusting VI timing values in real time to observe hardware effects. in particular, the initial goal is to be able to quickly iterate appropriate presets for MPAL
@@ -58,10 +62,4 @@ other VI registers are not (intentionally) touched. SERRATE, BURST, etc. i only 
 
 ---
 
-i'm using libdragon trunk because that's what my old test ROMs used. dunno if that matters, can probably be changed but i didn't want to deal with toolchain headaches, just wanted to make this work. current test ROM source is in the 'matrix' branch:
-
-https://github.com/meauxdal/N64-VI-Timing-Test/tree/matrix
-
-github build artifacts:
-
-https://github.com/meauxdal/N64-VI-Timing-Test/actions/runs/25997338320
+currently using libdragon trunk because that's what my old test ROMs used.
