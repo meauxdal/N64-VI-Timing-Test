@@ -27,7 +27,7 @@ jobs:
 
       - name: Cache libdragon build
         id: cache-libdragon
-        uses: actions/cache@v6
+        uses: actions/cache@v4
         with:
           path: /n64_toolchain
           key: libdragon-${{ env.LIBDRAGON_COMMIT }}
