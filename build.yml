@@ -1,0 +1,31 @@
+name: Build N64 ROM
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/dragonminded/libdragon:latest
+
+    env:
+      N64_INST: /n64_toolchain
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Provision Libdragon
+        run: |
+          git clone --depth 1 https://github.com/DragonMinded/libdragon.git /tmp/libdragon
+          cd /tmp/libdragon
+          ./build.sh $N64_INST
+          ls -l $N64_INST/include/n64.mk
+
+      - name: Build ROM
+        run: make all
+
+      - name: Upload ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: n64-rom
+          path: vi_timing_test.z64
