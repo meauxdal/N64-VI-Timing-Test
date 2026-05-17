@@ -10,16 +10,27 @@ jobs:
 
     env:
       N64_INST: /n64_toolchain
+      # Pinned libdragon trunk commit. Update this hash intentionally
+      # when you want to pick up libdragon changes.
+      LIBDRAGON_COMMIT: 7fee7254ef6b673a56c4bf6cc796fbb760173ab1
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Provision Libdragon
+      - name: Cache libdragon build
+        id: cache-libdragon
+        uses: actions/cache@v4
+        with:
+          path: /n64_toolchain
+          key: libdragon-${{ env.LIBDRAGON_COMMIT }}
+
+      - name: Build libdragon
+        if: steps.cache-libdragon.outputs.cache-hit != 'true'
         run: |
-          git clone --depth 1 https://github.com/DragonMinded/libdragon.git /tmp/libdragon
+          git clone https://github.com/DragonMinded/libdragon.git /tmp/libdragon
           cd /tmp/libdragon
+          git checkout $LIBDRAGON_COMMIT
           ./build.sh $N64_INST
-          ls -l $N64_INST/include/n64.mk
 
       - name: Build ROM
         run: make all
