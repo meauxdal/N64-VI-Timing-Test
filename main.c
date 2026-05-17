@@ -182,8 +182,7 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 
 // text section
 
-    snprintf(buf, sizeof(buf), "VI TIMING TEST",
-             progressive ? "P" : "I*", s);
+    snprintf(buf, sizeof(buf), "VI TIMING TEST");
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
 // ---------------------------------------------------------------------------
