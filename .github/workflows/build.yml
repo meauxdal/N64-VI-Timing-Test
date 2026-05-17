@@ -8,9 +8,18 @@ jobs:
     container:
       image: ghcr.io/dragonminded/libdragon:latest
 
+    strategy:
+      matrix:
+        preset:
+          - NTSC
+          - MPAL_MATH
+          - MPAL_OLD
+          - MPAL_PREVIEW
+          - PAL_1996
+          - PAL_1997
+
     env:
       N64_INST: /n64_toolchain
-      # 
       LIBDRAGON_COMMIT: 7fee7254ef6b673a56c4bf6cc796fbb760173ab1
 
     steps:
@@ -32,10 +41,11 @@ jobs:
           ./build.sh $N64_INST
 
       - name: Build ROM
-        run: make all
+        run: make PRESET=${{ matrix.preset }} all
 
       - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
-          name: n64-rom
-          path: vi_timing_test.z64
+          name: vi-timing-test-${{ matrix.preset }}
+          path: vi_timing_test_${{ matrix.preset }}.z64
+          

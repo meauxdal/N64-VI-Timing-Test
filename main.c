@@ -11,6 +11,9 @@
 #define REG_VI_H_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x1C))
 #define REG_VI_H_TOTAL_LEAP     ((volatile uint32_t*)(VI_BASE + 0x20))
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 // ---------------------------------------------------------------------------
 // Presets - select via make PRESET=<name>, e.g. make PRESET=MPAL_MATH
 // Default (no PRESET specified): NTSC
@@ -182,16 +185,15 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 
 // text section
 
-    snprintf(buf, sizeof(buf), "VI TIMING TEST");
+    snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", STR(PRESET));
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "H_TOTAL:  %d  ~%d.%02d Hz",
-             h_total, t.fh_int, t.fh_frac);
+    snprintf(buf, sizeof(buf), "H_TOTAL:     %d", h_total);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP PAT: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "LEAP PAT:    %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -200,21 +202,21 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
         (pat >> 0) & 1 ? '1' : '0');
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP_A:    %d  deltaA: +%d", leap_a, t.delta_a);
+    snprintf(buf, sizeof(buf), "LEAP_A:       %d  deltaA: +%d", leap_a, t.delta_a);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP_B:    %d  deltaB: +%d", leap_b, t.delta_b);
+    snprintf(buf, sizeof(buf), "LEAP_B:       %d  deltaB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
+    snprintf(buf, sizeof(buf), "avg/VSYNC:    %d.%d clk", t.avg_whole, t.avg_tenths);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 16;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "~fV:       %d.%02d Hz", t.fv_int, t.fv_frac);
+    snprintf(buf, sizeof(buf), "~fV:          %d.%02d Hz", t.fv_int, t.fv_frac);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
     
-    snprintf(buf, sizeof(buf), "~fH:       %d.%02d Hz", t.fh_int, t.fh_frac);
+    snprintf(buf, sizeof(buf), "~fH:          %d.%02d Hz", t.fh_int, t.fh_frac);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 16;
 
 // ---------------------------------------------------------------------------
