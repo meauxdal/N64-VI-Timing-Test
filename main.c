@@ -204,7 +204,7 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 // text section -------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", PRESET_NAME);
-    graphics_draw_text(disp, SAFE_X + 24, y, buf); y += 36;
+    graphics_draw_text(disp, SAFE_X + 48, y, buf); y += 48;
 
 // ---------------------------------------------------------------------------
 
@@ -246,16 +246,16 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
     snprintf(buf, sizeof(buf), "REG LEAP:     0x%08lX", (unsigned long)reg_leap);
-    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 16;
 
 // ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "L/R - even/odd halflines (P/I)");
-    graphics_draw_text(disp, SAFE_X + 16, 240 - SAFE_Y - 32, buf);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
     snprintf(buf, sizeof(buf), "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
-    graphics_draw_text(disp, SAFE_X + 16, 240 - SAFE_Y - 20, buf);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
     snprintf(buf, sizeof(buf), "C U/D: LEAP_A      C L/R: LEAP_B");
-    graphics_draw_text(disp, SAFE_X + 16, 240 - SAFE_Y - 8, buf);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 }
 
 // ---------------------------------------------------------------------------
