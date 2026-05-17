@@ -9,10 +9,10 @@
 // ---------------------------------------------------------------------------
 
 // MPAL progressive (Math/lidnariq)
-#define DEFAULT_H_TOTAL     3091
-#define DEFAULT_LEAP_PAT    0
-#define DEFAULT_LEAP_A      3091
-#define DEFAULT_LEAP_B      3091
+//#define DEFAULT_H_TOTAL     3091
+//#define DEFAULT_LEAP_PAT    0
+//#define DEFAULT_LEAP_A      3091
+//#define DEFAULT_LEAP_B      3091
 
 // MPAL progressive (older libdragon)
 //#define DEFAULT_H_TOTAL     3090
@@ -29,10 +29,10 @@
 // ---------------------------------------------------------------------------
 
 // NTSC
-//#define DEFAULT_H_TOTAL     3094
-//#define DEFAULT_LEAP_PAT    0
-//#define DEFAULT_LEAP_A      3094
-//#define DEFAULT_LEAP_B      3094
+#define DEFAULT_H_TOTAL     3094
+#define DEFAULT_LEAP_PAT    0
+#define DEFAULT_LEAP_A      3094
+#define DEFAULT_LEAP_B      3094
 
 // PAL (libdragon / 1996)
 //#define DEFAULT_H_TOTAL     3178
