@@ -100,13 +100,13 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
-    snprintf(buf, sizeof(buf), "VI TIMING TEST");
+    snprintf(buf, sizeof(buf), "     VI TIMING TEST");
     graphics_draw_text(disp, 8, 8, buf);
 
-    snprintf(buf, sizeof(buf), "H_TOTAL:    %d", h_total);
+    snprintf(buf, sizeof(buf), "     H_TOTAL:    %d", h_total);
     graphics_draw_text(disp, 8, 24, buf);
 
-    snprintf(buf, sizeof(buf), "LEAP PAT:   %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "     LEAP PAT:   %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -115,10 +115,10 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
         (pat >> 0) & 1 ? '1' : '0');
     graphics_draw_text(disp, 8, 40, buf);
 
-    snprintf(buf, sizeof(buf), "LEAP_A:     %d", leap_a);
+    snprintf(buf, sizeof(buf), "     LEAP_A:     %d", leap_a);
     graphics_draw_text(disp, 8, 56, buf);
 
-    snprintf(buf, sizeof(buf), "LEAP_B:     %d", leap_b);
+    snprintf(buf, sizeof(buf), "     LEAP_B:     %d", leap_b);
     graphics_draw_text(disp, 8, 72, buf);
 
     graphics_set_color(graphics_make_color(0, 0, 0, 180), 0);
