@@ -1,21 +1,50 @@
 #include <stdio.h>
 #include <libdragon.h>
 
-// ---------------------------------------------------------------------------
 // VI register addresses (uncached KSEG1)
-// ---------------------------------------------------------------------------
 #define VI_BASE             0xA4400000
 #define VI_H_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x1C))
 #define VI_H_TOTAL_LEAP     ((volatile uint32_t*)(VI_BASE + 0x20))
 
 // ---------------------------------------------------------------------------
-// Starting values: lidnariq Math preset for MPAL Progressive
-// H_TOTAL=3091 (effective), LEAP pattern=0, LEAP_A=3091, LEAP_B=3091
-// ---------------------------------------------------------------------------
+
+// MPAL progressive (Math/lidnariq)
 #define DEFAULT_H_TOTAL     3091
 #define DEFAULT_LEAP_PAT    0
 #define DEFAULT_LEAP_A      3091
 #define DEFAULT_LEAP_B      3091
+
+// MPAL progressive (older libdragon)
+//#define DEFAULT_H_TOTAL     3090
+//#define DEFAULT_LEAP_PAT    4
+//#define DEFAULT_LEAP_A      3099
+//#define DEFAULT_LEAP_B      3098
+
+// MPAL (libdragon preview)
+//#define DEFAULT_H_TOTAL     3089
+//#define DEFAULT_LEAP_PAT    0
+//#define DEFAULT_LEAP_A      3101
+//#define DEFAULT_LEAP_B      3101
+
+// ---------------------------------------------------------------------------
+
+// NTSC
+//#define DEFAULT_H_TOTAL     3094
+//#define DEFAULT_LEAP_PAT    0
+//#define DEFAULT_LEAP_A      3094
+//#define DEFAULT_LEAP_B      3094
+
+// PAL (libdragon / 1996)
+//#define DEFAULT_H_TOTAL     3178
+//#define DEFAULT_LEAP_PAT    21
+//#define DEFAULT_LEAP_A      3183
+//#define DEFAULT_LEAP_B      3184
+
+// PAL (1997)
+//#define DEFAULT_H_TOTAL     3178
+//#define DEFAULT_LEAP_PAT    23
+//#define DEFAULT_LEAP_A      3182
+//#define DEFAULT_LEAP_B      3184
 
 // ---------------------------------------------------------------------------
 // Write VI timing registers directly to hardware.
@@ -71,7 +100,7 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
-    snprintf(buf, sizeof(buf), "VI MPAL TIMING TEST");
+    snprintf(buf, sizeof(buf), "MPAL VI TIMING TEST");
     graphics_draw_text(disp, 8, 8, buf);
 
     snprintf(buf, sizeof(buf), "H_TOTAL:    %d", h_total);
@@ -93,9 +122,9 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     graphics_draw_text(disp, 8, 72, buf);
 
     graphics_set_color(graphics_make_color(0, 0, 0, 180), 0);
-    snprintf(buf, sizeof(buf), "DU/D: H_TOTAL  LR: PAT");
+    snprintf(buf, sizeof(buf), "DPAD UP/DOWN: H_TOTAL   DPAD LEFT/RIGHT: LEAP PATTERN");
     graphics_draw_text(disp, 8, 210, buf);
-    snprintf(buf, sizeof(buf), "CU/D: LEAP_A   CL/R: LEAP_B");
+    snprintf(buf, sizeof(buf), "C UP/DOWN: LEAP_A       C LEFT/RIGHT: LEAP_B");
     graphics_draw_text(disp, 8, 222, buf);
 }
 
