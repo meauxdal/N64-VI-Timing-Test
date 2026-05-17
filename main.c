@@ -204,14 +204,14 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
 // text section -------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", PRESET_NAME);
-    graphics_draw_text(disp, SAFE_X + 48, y, buf); y += 48;
+    graphics_draw_text(disp, SAFE_X + 54, y, buf); y += 36;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "H_TOTAL:      %d", h_total);
+    snprintf(buf, sizeof(buf), "     H_TOTAL: %d", h_total);
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP PAT:     %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "    LEAP PAT: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -220,33 +220,33 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
         (pat >> 0) & 1 ? '1' : '0');
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP_A:       %d  deltaA: +%d", leap_a, t.delta_a);
+    snprintf(buf, sizeof(buf), "      LEAP_A: %d  deltaA: +%d", leap_a, t.delta_a);
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP_B:       %d  deltaB: +%d", leap_b, t.delta_b);
+    snprintf(buf, sizeof(buf), "      LEAP_B: %d  deltaB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "avg/VSYNC:    %d.%d clk", t.avg_whole, t.avg_tenths);
-    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 16;
+    snprintf(buf, sizeof(buf), "   avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 24;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "~fV:          %d.%02d Hz", t.fv_int, t.fv_frac);
+    snprintf(buf, sizeof(buf), "         ~fV: %d.%02d Hz", t.fv_int, t.fv_frac);
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
     
-    snprintf(buf, sizeof(buf), "~fH:          %d.%02d Hz", t.fh_int, t.fh_frac);
-    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 16;
+    snprintf(buf, sizeof(buf), "         ~fH: %d.%02d Hz", t.fh_int, t.fh_frac);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 24;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "REG V_TOTAL:  0x%08lX", (unsigned long)reg_vt);
+    snprintf(buf, sizeof(buf), " REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "REG H_TOTAL:  0x%08lX", (unsigned long)reg_ht);
+    snprintf(buf, sizeof(buf), " REG H_TOTAL: 0x%08lX", (unsigned long)reg_ht);
     graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "REG LEAP:     0x%08lX", (unsigned long)reg_leap);
-    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 16;
+    snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
+    graphics_draw_text(disp, SAFE_X + 16, y, buf); y += 24;
 
 // ---------------------------------------------------------------------------
 
