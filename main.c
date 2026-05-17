@@ -42,24 +42,23 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b)
 // ---------------------------------------------------------------------------
 static void draw_color_bars(surface_t *disp)
 {
-    static const uint32_t colors[7] = {
-        0xFFFFFFFF, // white
-        0xFFFF00FF, // yellow
-        0x00FFFFFF, // cyan
-        0x00FF00FF, // green
-        0xFF00FFFF, // magenta
-        0xFF0000FF, // red
-        0x0000FFFF, // blue
+    static const uint8_t bars[7][3] = {
+        {255, 255, 255}, // white
+        {255, 255,   0}, // yellow
+        {  0, 255, 255}, // cyan
+        {  0, 255,   0}, // green
+        {255,   0, 255}, // magenta
+        {255,   0,   0}, // red
+        {  0,   0, 255}, // blue
     };
 
-    int w = 320;
-    int h = 240;
-    int bar_w = w / 7;
+    int bar_w = 320 / 7;
 
     for (int i = 0; i < 7; i++) {
         int x0 = i * bar_w;
-        int x1 = (i == 6) ? w : x0 + bar_w;
-        graphics_draw_box(disp, x0, 0, x1 - x0, h, colors[i]);
+        int w  = (i == 6) ? 320 - x0 : bar_w;
+        uint32_t color = graphics_make_color(bars[i][0], bars[i][1], bars[i][2], 255);
+        graphics_draw_box(disp, x0, 0, w, 240, color);
     }
 }
 
