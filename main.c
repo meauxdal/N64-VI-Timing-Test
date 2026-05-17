@@ -80,14 +80,12 @@
 #endif
 
 // ---------------------------------------------------------------------------
-// Write VI timing registers directly to hardware.
+// Write VI timing registers directly.
 // REG_VI_V_TOTAL:      bits 9:0 = S - 1 (effective half-lines per frame)
 // REG_VI_H_TOTAL:      bits 20:16 = 5-bit leap pattern, bits 11:0 = h_total-1
 // REG_VI_H_TOTAL_LEAP: bits 27:16 = leap_a-1, bits 11:0 = leap_b-1
-// LEAP_A and LEAP_B are clamped to >= h_total (per wiki: values smaller
-// than H_TOTAL cause undesired side effects including skipped hsyncs).
-// Note: SERRATE (VI_CTRL bit 6) is not toggled here. S reflects the
-// half-line count only; true interlaced signaling requires SERRATE set.
+// LEAP_A and LEAP_B are clamped to >= h_total.
+// Note: SERRATE (VI_CTRL bit 6) is not toggled. L/R adjusts half-lines only
 // ---------------------------------------------------------------------------
 static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
 {
@@ -102,11 +100,7 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
 }
 
 // ---------------------------------------------------------------------------
-// Compute derived timing estimates.
-// fH and fV ignore leap compensation; they are exact when no leap correction
-// is applied (LEAP_A = LEAP_B = H_TOTAL).
-// avg extra clocks per VSYNC = sum of leap deltas over 5-VSYNC cycle / 5.
-// ---------------------------------------------------------------------------
+
 typedef struct {
     int fh_int;
     int fh_frac;
@@ -146,9 +140,7 @@ static timing_t compute_timing(int h_total, int pat, int leap_a, int leap_b, int
 }
 
 // ---------------------------------------------------------------------------
-// Draw seven vertical color bars filling the screen.
-// Standard color bar order: white, yellow, cyan, green, magenta, red, blue.
-// ---------------------------------------------------------------------------
+
 static void draw_color_bars(surface_t *disp)
 {
     static const uint8_t bars[7][3] = {
@@ -188,15 +180,19 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     int y = SAFE_Y;
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
-    snprintf(buf, sizeof(buf), "     VI TIMING TEST  [%s S=%d]",
+// text section
+
+    snprintf(buf, sizeof(buf), "VI TIMING TEST",
              progressive ? "P" : "I*", s);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     H_TOTAL:  %d  ~%d.%02d Hz",
+// ---------------------------------------------------------------------------
+
+    snprintf(buf, sizeof(buf), "H_TOTAL:  %d  ~%d.%02d Hz",
              h_total, t.fh_int, t.fh_frac);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     LEAP PAT: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "LEAP PAT: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -205,29 +201,41 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
         (pat >> 0) & 1 ? '1' : '0');
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     LEAP_A:   %d  dA: +%d", leap_a, t.delta_a);
+    snprintf(buf, sizeof(buf), "LEAP_A:    %d  deltaA: +%d", leap_a, t.delta_a);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     LEAP_B:   %d  dB: +%d", leap_b, t.delta_b);
+    snprintf(buf, sizeof(buf), "LEAP_B:    %d  deltaB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     avg/VSYNC: %d.%d clk  ~fV: %d.%02d Hz",
-             t.avg_whole, t.avg_tenths, t.fv_int, t.fv_frac);
+    snprintf(buf, sizeof(buf), "avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 16;
 
-    graphics_set_color(graphics_make_color(0, 0, 0, 180), 0);
-    snprintf(buf, sizeof(buf), "     REG V_TOTAL:  0x%08lX", (unsigned long)reg_vt);
+// ---------------------------------------------------------------------------
+
+    snprintf(buf, sizeof(buf), "~fV:       %d.%02d Hz", t.fv_int, t.fv_frac);
+    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
+    
+    snprintf(buf, sizeof(buf), "~fH:       %d.%02d Hz", t.fh_int, t.fh_frac);
+    graphics_draw_text(disp, SAFE_X, y, buf); y += 16;
+
+// ---------------------------------------------------------------------------
+
+    snprintf(buf, sizeof(buf), "REG V_TOTAL:  0x%08lX", (unsigned long)reg_vt);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     REG H_TOTAL:  0x%08lX", (unsigned long)reg_ht);
+    snprintf(buf, sizeof(buf), "REG H_TOTAL:  0x%08lX", (unsigned long)reg_ht);
     graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "     REG LEAP:     0x%08lX", (unsigned long)reg_leap);
-    graphics_draw_text(disp, SAFE_X, y, buf);
+    snprintf(buf, sizeof(buf), "REG LEAP:     0x%08lX", (unsigned long)reg_leap);
+    graphics_draw_text(disp, SAFE_X, y, buf); y += 12;
 
-    snprintf(buf, sizeof(buf), "DPAD U/D: H_TOTAL  DPAD L/R: PAT  L/R: P/I");
+// ---------------------------------------------------------------------------
+
+    snprintf(buf, sizeof(buf), "L/R - even/odd halflines (P/I)");
+    graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 32, buf);
+    snprintf(buf, sizeof(buf), "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
     graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 20, buf);
-    snprintf(buf, sizeof(buf), "C U/D: LEAP_A      C L/R: LEAP_B  *no SERRATE");
+    snprintf(buf, sizeof(buf), "C U/D: LEAP_A      C L/R: LEAP_B");
     graphics_draw_text(disp, SAFE_X, 240 - SAFE_Y - 8, buf);
 }
 
