@@ -122,9 +122,9 @@ static void draw_overlay(surface_t *disp, int h_total, int pat, int leap_a, int 
     graphics_draw_text(disp, 8, 72, buf);
 
     graphics_set_color(graphics_make_color(0, 0, 0, 180), 0);
-    snprintf(buf, sizeof(buf), "DPAD UP/DOWN: H_TOTAL   DPAD LEFT/RIGHT: LEAP PATTERN");
+    snprintf(buf, sizeof(buf), "DPAD UP/DOWN: H_TOTAL   DPAD L/R: PATTERN");
     graphics_draw_text(disp, 8, 210, buf);
-    snprintf(buf, sizeof(buf), "C UP/DOWN: LEAP_A       C LEFT/RIGHT: LEAP_B");
+    snprintf(buf, sizeof(buf), "C UP/DOWN: LEAP_A       C L/R: LEAP_B");
     graphics_draw_text(disp, 8, 222, buf);
 }
 
