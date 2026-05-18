@@ -6,6 +6,27 @@
 #define REG_VI_V_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x18))
 #define REG_VI_H_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x1C))
 #define REG_VI_H_TOTAL_LEAP     ((volatile uint32_t*)(VI_BASE + 0x20))
+#define REG_VI_Y_SCALE          ((volatile uint32_t*)(VI_BASE + 0x34))
+#define PAL_V_SCALE 0x355
+
+static void apply_vi_y_scale(uint16_t y_scale, uint16_t y_offset)
+{
+    *REG_VI_Y_SCALE =
+        ((uint32_t)(y_offset & 0x3FF) << 16) |
+        ((uint32_t)(y_scale  & 0x0FFF));
+}
+
+static int vi_vertical_offset(int scale)
+{
+    // approximate centering compensation
+    // 0x400 = 1.0
+    // smaller scale = taller image → needs upward shift
+
+    int delta = (0x400 - scale);
+
+    // empirically tuned constant (N64 VI behaves non-linearly)
+    return (delta * 240) / 0x400 / 2;
+}
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -135,7 +156,7 @@ static const preset_t preset_pal_1996 = {
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
-    .fb_height  = 288,
+    .fb_height  = 240,
 
     .safe_x = 20,
     .safe_y = 20,
@@ -156,7 +177,7 @@ static const preset_t preset_pal_1997 __attribute__((unused)) = {
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
-    .fb_height  = 288,
+    .fb_height  = 240,
 
     .safe_x = 20,
     .safe_y = 20,
@@ -273,7 +294,7 @@ static timing_t compute_timing(
 
 // ---------------------------------------------------------------------------
 
-static void draw_color_bars(surface_t *disp)
+static void draw_color_bars(surface_t *disp, int voff)
 {
     static const uint8_t bars[7][3] = {
         {255, 255, 255},
@@ -298,7 +319,7 @@ static void draw_color_bars(surface_t *disp)
             255
         );
 
-        graphics_draw_box(disp, x0, 0, w, preset->fb_height, color);
+        graphics_draw_box(disp, x0, voff, w, preset->fb_height, color);
     }
 }
 
@@ -310,8 +331,10 @@ static void draw_overlay(
     int pat,
     int leap_a,
     int leap_b,
-    int s)
-{
+    int s,
+    int voff
+)
+
     char buf[64];
 
     timing_t t = compute_timing(
@@ -332,11 +355,11 @@ static void draw_overlay(
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
-    graphics_draw_text(disp, preset->safe_x + 54, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 54, y + voff, buf);
     y += 36;
 
     snprintf(buf, sizeof(buf), "     H_TOTAL: %d", h_total);
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
@@ -348,7 +371,7 @@ static void draw_overlay(
         (pat >> 1) & 1 ? '1' : '0',
         (pat >> 0) & 1 ? '1' : '0');
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
@@ -356,7 +379,7 @@ static void draw_overlay(
         leap_a,
         t.delta_a);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
@@ -364,7 +387,7 @@ static void draw_overlay(
         leap_b,
         t.delta_b);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
@@ -372,7 +395,7 @@ static void draw_overlay(
         t.avg_whole,
         t.avg_tenths);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 16;
 
     snprintf(buf, sizeof(buf),
@@ -380,7 +403,7 @@ static void draw_overlay(
         t.fv_int,
         t.fv_frac);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
@@ -388,53 +411,53 @@ static void draw_overlay(
         t.fh_int,
         t.fh_frac);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 16;
 
     snprintf(buf, sizeof(buf),
         "         MODE: %s",
         (s == preset->vi_s) ? "PROGRESSIVE" : "INTERLACED");
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 16;
 
     snprintf(buf, sizeof(buf),
         " REG V_TOTAL: 0x%08lX",
         (unsigned long)reg_vt);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
         " REG H_TOTAL: 0x%08lX",
         (unsigned long)reg_ht);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
         "    REG LEAP: 0x%08lX",
         (unsigned long)reg_leap);
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 20;
 
     snprintf(buf, sizeof(buf),
         "L/R - even/odd halflines (P/I)");
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
         "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
         "C U/D: LEAP_A      C L/R: LEAP_B");
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
 }
 
 // ---------------------------------------------------------------------------
@@ -505,6 +528,16 @@ int main(void)
         ANTIALIAS_RESAMPLE_FETCH_ALWAYS
     );
 
+    #if defined(PRESET_PAL_1996) || defined(PRESET_PAL_1997)
+
+    // 2.10 fixed-point
+    // 0x400 = 1.0
+    // 0x4CD ≈ 1.2
+
+    apply_vi_y_scale(0x355, 0);
+
+    #endif
+
     joypad_init();
     debug_init_usblog();
 
@@ -513,6 +546,16 @@ int main(void)
     int leap_a  = preset->default_leap_a;
     int leap_b  = preset->default_leap_b;
     int s       = preset->vi_s;
+    int voff    = vi_vertical_offset(PAL_V_SCALE);
+
+    surface_t *disp = display_get();
+
+    int voff = vi_vertical_offset(PAL_V_SCALE);
+
+    draw_color_bars(disp, voff);
+    draw_overlay(disp, h_total, pat, leap_a, leap_b, s, voff);
+
+    display_show(disp);
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
     log_values(h_total, pat, leap_a, leap_b, s);
