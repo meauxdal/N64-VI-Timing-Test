@@ -334,7 +334,8 @@ static void draw_overlay(
     int s,
     int voff
 )
-
+ 
+    {
     char buf[64];
 
     timing_t t = compute_timing(
@@ -549,8 +550,6 @@ int main(void)
     int voff    = vi_vertical_offset(PAL_V_SCALE);
 
     surface_t *disp = display_get();
-
-    int voff = vi_vertical_offset(PAL_V_SCALE);
 
     draw_color_bars(disp, voff);
     draw_overlay(disp, h_total, pat, leap_a, leap_b, s, voff);
