@@ -588,8 +588,8 @@ int main(void)
 
         surface_t *disp = display_get();
 
-        draw_color_bars(disp);
-        draw_overlay(disp, h_total, pat, leap_a, leap_b, s);
+        draw_color_bars(disp, voff);
+        draw_overlay(disp, h_total, pat, leap_a, leap_b, s, voff);
 
         display_show(disp);
     }
