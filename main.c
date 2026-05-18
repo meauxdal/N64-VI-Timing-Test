@@ -163,6 +163,27 @@ static const preset_t preset_pal_1997 __attribute__((unused)) = {
     .safe_y = 20,
 };
 
+static const preset_t preset_pal60 __attribute__((unused)) = {
+    .name = "PAL60",
+
+    .fvi_num = 49656530LL,
+    .fvi_den = 1LL,
+
+    .vi_s = 526,
+
+    .default_h_total = 3156,
+    .default_pat     = 0,
+    .default_leap_a  = 3156,
+    .default_leap_b  = 3156,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 20,
+};
+
 // ---------------------------------------------------------------------------
 // Active preset selection
 // ---------------------------------------------------------------------------
@@ -177,6 +198,8 @@ static const preset_t preset_pal_1997 __attribute__((unused)) = {
     #define ACTIVE_PRESET preset_pal_1996
 #elif defined(PRESET_PAL_1997)
     #define ACTIVE_PRESET preset_pal_1997
+#elif defined(PRESET_PAL60)
+    #define ACTIVE_PRESET preset_pal60
 #else
     #define ACTIVE_PRESET preset_ntsc
 #endif
