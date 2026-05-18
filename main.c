@@ -101,6 +101,24 @@
 #endif
 
 // ---------------------------------------------------------------------------
+// Video mode selection
+// ---------------------------------------------------------------------------
+
+#if defined(PRESET_PAL_1996) || defined(PRESET_PAL_1997)
+
+    #define FB_RESOLUTION   RESOLUTION_320x288
+    #define FB_WIDTH        320
+    #define FB_HEIGHT       288
+
+#else
+
+    #define FB_RESOLUTION   RESOLUTION_320x240
+    #define FB_WIDTH        320
+    #define FB_HEIGHT       240
+
+#endif
+
+// ---------------------------------------------------------------------------
 // Write VI timing registers directly.
 // REG_VI_V_TOTAL:      bits 9:0 = S - 1 (effective half-lines per frame)
 // REG_VI_H_TOTAL:      bits 20:16 = 5-bit leap pattern, bits 11:0 = h_total-1
@@ -116,7 +134,7 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
     if (pat > 31) pat = 31;
 
     *REG_VI_V_TOTAL      = (s - 1) & 0x3FF;
-    *REG_VI_H_TOTAL      = ((pat & 0x1F) << 16) | ((h_total - 1) & 0xFFF);
+    *REG_VI_H_TOTAL      = (uint32_t)(((pat & 0x1F) << 16) | ((h_total - 1) & 0xFFF));
     *REG_VI_H_TOTAL_LEAP = (((leap_a - 1) & 0xFFF) << 16) | ((leap_b - 1) & 0xFFF);
 }
 
@@ -174,13 +192,13 @@ static void draw_color_bars(surface_t *disp)
         {  0,   0, 255}, // blue
     };
 
-    int bar_w = 320 / 7;
+    int bar_w = FB_WIDTH / 7;
 
     for (int i = 0; i < 7; i++) {
         int x0 = i * bar_w;
-        int w  = (i == 6) ? 320 - x0 : bar_w;
+        int w  = (i == 6) ? FB_WIDTH - x0 : bar_w;
         uint32_t color = graphics_make_color(bars[i][0], bars[i][1], bars[i][2], 255);
-        graphics_draw_box(disp, x0, 0, w, 240, color);
+        graphics_draw_box(disp, x0, 0, w, FB_HEIGHT, color);
     }
 }
 
@@ -289,15 +307,14 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 // ---------------------------------------------------------------------------
 int main(void)
 {
-    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE_FETCH_ALWAYS);
+    display_init(FB_RESOLUTION, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE_FETCH_ALWAYS);
     joypad_init();
     debug_init_usblog();
 
-    int h_total = DEFAULT_H_TOTAL;
-    int pat     = DEFAULT_LEAP_PAT;
-    int leap_a  = DEFAULT_LEAP_A;
-    int leap_b  = DEFAULT_LEAP_B;
-    int s       = VI_S;  // start progressive
+    int h_total     = DEFAULT_H_TOTAL;
+    int pat         = DEFAULT_LEAP_PAT;
+    int leap_b      = DEFAULT_LEAP_B;
+    int s           = VI_S;  // start progressive
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
     log_values(h_total, pat, leap_a, leap_b, s);
