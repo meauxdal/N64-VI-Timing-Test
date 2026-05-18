@@ -381,11 +381,11 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 20;
 
-    graphics_draw_text(disp, preset->safe_x + 16, y, "L/R - even/odd halflines (P/I)");
+    graphics_draw_text(disp, preset->safe_x + 14, y, "L/R - even/odd halflines (P/I)");
     y += 12;
-    graphics_draw_text(disp, preset->safe_x + 16, y, "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
+    graphics_draw_text(disp, preset->safe_x + 14, y, "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
     y += 12;
-    graphics_draw_text(disp, preset->safe_x + 16, y, "C U/D: LEAP_A      C L/R: LEAP_B");
+    graphics_draw_text(disp, preset->safe_x + 14, y, "C U/D: LEAP_A      C L/R: LEAP_B");
 }
 
 // ---------------------------------------------------------------------------
