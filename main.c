@@ -57,7 +57,7 @@ typedef struct {
 // Presets
 // ---------------------------------------------------------------------------
 
-static const preset_t preset_ntsc = {
+static const preset_t preset_ntsc __attribute__((unused)) = {
     .name = "NTSC",
 
     .fvi_num = 535500000LL,
@@ -78,7 +78,7 @@ static const preset_t preset_ntsc = {
     .safe_y = 16,
 };
 
-static const preset_t preset_mpal_math = {
+static const preset_t preset_mpal_math __attribute__((unused)) = {
     .name = "MPAL_MATH",
 
     .fvi_num = 6953850000LL,
@@ -99,7 +99,7 @@ static const preset_t preset_mpal_math = {
     .safe_y = 16,
 };
 
-static const preset_t preset_mpal_old = {
+static const preset_t preset_mpal_old __attribute__((unused)) = {
     .name = "MPAL_OLD",
 
     .fvi_num = 6953850000LL,
@@ -120,7 +120,7 @@ static const preset_t preset_mpal_old = {
     .safe_y = 16,
 };
 
-static const preset_t preset_mpal_preview = {
+static const preset_t preset_mpal_preview __attribute__((unused)) = {
     .name = "MPAL_PREVIEW",
 
     .fvi_num = 6953850000LL,
@@ -141,7 +141,7 @@ static const preset_t preset_mpal_preview = {
     .safe_y = 16,
 };
 
-static const preset_t preset_pal_1996 = {
+static const preset_t preset_pal_1996 __attribute__((unused)) = {
     .name = "PAL_1996",
 
     .fvi_num = 49656530LL,
