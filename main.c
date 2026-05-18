@@ -133,7 +133,7 @@ static const preset_t preset_pal_1996 = {
     .default_leap_a  = 3183,
     .default_leap_b  = 3184,
 
-    .resolution = RESOLUTION_320x288,
+    .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
     .fb_height  = 288,
 
@@ -141,7 +141,7 @@ static const preset_t preset_pal_1996 = {
     .safe_y = 20,
 };
 
-static const preset_t preset_pal_1997 = {
+static const preset_t preset_pal_1997 __attribute__((unused)) = {
     .name = "PAL_1997",
 
     .fvi_num = 49656530LL,
@@ -154,7 +154,7 @@ static const preset_t preset_pal_1997 = {
     .default_leap_a  = 3182,
     .default_leap_b  = 3184,
 
-    .resolution = RESOLUTION_320x288,
+    .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
     .fb_height  = 288,
 
