@@ -2,31 +2,11 @@
 #include <libdragon.h>
 
 // VI register addresses (uncached KSEG1) ------------------------------------
-#define VI_BASE                 0xA4400000
-#define REG_VI_V_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x18))
-#define REG_VI_H_TOTAL          ((volatile uint32_t*)(VI_BASE + 0x1C))
-#define REG_VI_H_TOTAL_LEAP     ((volatile uint32_t*)(VI_BASE + 0x20))
-#define REG_VI_Y_SCALE          ((volatile uint32_t*)(VI_BASE + 0x34))
-#define PAL_V_SCALE 0x355
-
-static void apply_vi_y_scale(uint16_t y_scale, uint16_t y_offset)
-{
-    *REG_VI_Y_SCALE =
-        ((uint32_t)(y_offset & 0x3FF) << 16) |
-        ((uint32_t)(y_scale  & 0x0FFF));
-}
-
-static int vi_vertical_offset(int scale)
-{
-    // approximate centering compensation
-    // 0x400 = 1.0
-    // smaller scale = taller image → needs upward shift
-
-    int delta = (0x400 - scale);
-
-    // empirically tuned constant (N64 VI behaves non-linearly)
-    return (delta * 240) / 0x400 / 2;
-}
+#define VI_BASE             0xA4400000
+#define REG_VI_V_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x18))
+#define REG_VI_H_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x1C))
+#define REG_VI_H_TOTAL_LEAP ((volatile uint32_t*)(VI_BASE + 0x20))
+#define REG_VI_V_VIDEO      ((volatile uint32_t*)(VI_BASE + 0x28))
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -209,20 +189,11 @@ static const preset_t *preset = &ACTIVE_PRESET;
 
 static void sanitize_timing(int *h_total, int *pat, int *leap_a, int *leap_b)
 {
-    if (*h_total < 1)
-        *h_total = 1;
-
-    if (*leap_a < *h_total)
-        *leap_a = *h_total;
-
-    if (*leap_b < *h_total)
-        *leap_b = *h_total;
-
-    if (*pat < 0)
-        *pat = 0;
-
-    if (*pat > 31)
-        *pat = 31;
+    if (*h_total < 1)   *h_total = 1;
+    if (*leap_a < *h_total) *leap_a = *h_total;
+    if (*leap_b < *h_total) *leap_b = *h_total;
+    if (*pat < 0)       *pat = 0;
+    if (*pat > 31)      *pat = 31;
 }
 
 static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
@@ -256,7 +227,7 @@ typedef struct {
 } timing_t;
 
 static timing_t compute_timing(
-    const preset_t *preset,
+    const preset_t *p,
     int h_total,
     int pat,
     int leap_a,
@@ -265,12 +236,12 @@ static timing_t compute_timing(
 {
     timing_t t = {0};
 
-    long long den_h = preset->fvi_den * (long long)h_total;
+    long long den_h = p->fvi_den * (long long)h_total;
 
-    t.fh_int  = (int)(preset->fvi_num / den_h);
-    t.fh_frac = (int)((preset->fvi_num % den_h) * 100LL / den_h);
+    t.fh_int  = (int)(p->fvi_num / den_h);
+    t.fh_frac = (int)((p->fvi_num % den_h) * 100LL / den_h);
 
-    long long fv_num = 2LL * preset->fvi_num;
+    long long fv_num = 2LL * p->fvi_num;
     long long fv_den = den_h * (long long)s;
 
     t.fv_int  = (int)(fv_num / fv_den);
@@ -280,12 +251,10 @@ static timing_t compute_timing(
     t.delta_b = leap_b - h_total;
 
     int total_extra = 0;
-
     for (int i = 0; i < 5; i++)
         total_extra += ((pat >> i) & 1) ? t.delta_b : t.delta_a;
 
     int avg10 = total_extra * 2;
-
     t.avg_whole  = avg10 / 10;
     t.avg_tenths = avg10 % 10;
 
@@ -294,7 +263,7 @@ static timing_t compute_timing(
 
 // ---------------------------------------------------------------------------
 
-static void draw_color_bars(surface_t *disp, int voff)
+static void draw_color_bars(surface_t *disp)
 {
     static const uint8_t bars[7][3] = {
         {255, 255, 255},
@@ -311,15 +280,8 @@ static void draw_color_bars(surface_t *disp, int voff)
     for (int i = 0; i < 7; i++) {
         int x0 = i * bar_w;
         int w  = (i == 6) ? preset->fb_width - x0 : bar_w;
-
-        uint32_t color = graphics_make_color(
-            bars[i][0],
-            bars[i][1],
-            bars[i][2],
-            255
-        );
-
-        graphics_draw_box(disp, x0, voff, w, preset->fb_height, color);
+        uint32_t color = graphics_make_color(bars[i][0], bars[i][1], bars[i][2], 255);
+        graphics_draw_box(disp, x0, 0, w, preset->fb_height, color);
     }
 }
 
@@ -331,21 +293,11 @@ static void draw_overlay(
     int pat,
     int leap_a,
     int leap_b,
-    int s,
-    int voff
-)
- 
-    {
+    int s)
+{
     char buf[64];
 
-    timing_t t = compute_timing(
-        preset,
-        h_total,
-        pat,
-        leap_a,
-        leap_b,
-        s
-    );
+    timing_t t = compute_timing(preset, h_total, pat, leap_a, leap_b, s);
 
     uint32_t reg_vt   = *REG_VI_V_TOTAL;
     uint32_t reg_ht   = *REG_VI_H_TOTAL;
@@ -356,11 +308,11 @@ static void draw_overlay(
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
-    graphics_draw_text(disp, preset->safe_x + 54, y + voff, buf);
+    graphics_draw_text(disp, preset->safe_x + 54, y, buf);
     y += 36;
 
     snprintf(buf, sizeof(buf), "     H_TOTAL: %d", h_total);
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
     snprintf(buf, sizeof(buf),
@@ -371,94 +323,46 @@ static void draw_overlay(
         (pat >> 2) & 1 ? '1' : '0',
         (pat >> 1) & 1 ? '1' : '0',
         (pat >> 0) & 1 ? '1' : '0');
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "      LEAP_A: %d  deltaA: +%d",
-        leap_a,
-        t.delta_a);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), "      LEAP_A: %d  deltaA: +%d", leap_a, t.delta_a);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "      LEAP_B: %d  deltaB: +%d",
-        leap_b,
-        t.delta_b);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), "      LEAP_B: %d  deltaB: +%d", leap_b, t.delta_b);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "   avg/VSYNC: %d.%d clk",
-        t.avg_whole,
-        t.avg_tenths);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), "   avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
-    snprintf(buf, sizeof(buf),
-        "         ~fV: %d.%02d Hz",
-        t.fv_int,
-        t.fv_frac);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), "         ~fV: %d.%02d Hz", t.fv_int, t.fv_frac);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "         ~fH: %d.%02d Hz",
-        t.fh_int,
-        t.fh_frac);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), "         ~fH: %d.%02d Hz", t.fh_int, t.fh_frac);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
-    snprintf(buf, sizeof(buf),
-        "         MODE: %s",
-        (s == preset->vi_s) ? "PROGRESSIVE" : "INTERLACED");
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
-    y += 16;
-
-    snprintf(buf, sizeof(buf),
-        " REG V_TOTAL: 0x%08lX",
-        (unsigned long)reg_vt);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), " REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        " REG H_TOTAL: 0x%08lX",
-        (unsigned long)reg_ht);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), " REG H_TOTAL: 0x%08lX", (unsigned long)reg_ht);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "    REG LEAP: 0x%08lX",
-        (unsigned long)reg_leap);
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 20;
 
-    snprintf(buf, sizeof(buf),
-        "L/R - even/odd halflines (P/I)");
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y, "L/R - even/odd halflines (P/I)");
     y += 12;
-
-    snprintf(buf, sizeof(buf),
-        "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y, "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
     y += 12;
-
-    snprintf(buf, sizeof(buf),
-        "C U/D: LEAP_A      C L/R: LEAP_B");
-
-    graphics_draw_text(disp, preset->safe_x + 16, y + voff, buf);
+    graphics_draw_text(disp, preset->safe_x + 16, y, "C U/D: LEAP_A      C L/R: LEAP_B");
 }
 
 // ---------------------------------------------------------------------------
@@ -467,14 +371,7 @@ static void draw_overlay(
 
 static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 {
-    timing_t t = compute_timing(
-        preset,
-        h_total,
-        pat,
-        leap_a,
-        leap_b,
-        s
-    );
+    timing_t t = compute_timing(preset, h_total, pat, leap_a, leap_b, s);
 
     debugf(
         "S=%d(%s) H_TOTAL=%d PAT=%d(0b%c%c%c%c%c) "
@@ -484,9 +381,7 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 
         s,
         (s == preset->vi_s) ? "P" : "I*",
-
-        h_total,
-        pat,
+        h_total, pat,
 
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -494,20 +389,11 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
         (pat >> 1) & 1 ? '1' : '0',
         (pat >> 0) & 1 ? '1' : '0',
 
-        leap_a,
-        leap_b,
-
-        t.delta_a,
-        t.delta_b,
-
-        t.avg_whole,
-        t.avg_tenths,
-
-        t.fh_int,
-        t.fh_frac,
-
-        t.fv_int,
-        t.fv_frac,
+        leap_a, leap_b,
+        t.delta_a, t.delta_b,
+        t.avg_whole, t.avg_tenths,
+        t.fh_int, t.fh_frac,
+        t.fv_int, t.fv_frac,
 
         (unsigned long)*REG_VI_V_TOTAL,
         (unsigned long)*REG_VI_H_TOTAL,
@@ -529,15 +415,16 @@ int main(void)
         ANTIALIAS_RESAMPLE_FETCH_ALWAYS
     );
 
-    #if defined(PRESET_PAL_1996) || defined(PRESET_PAL_1997)
-
-    // 2.10 fixed-point
-    // 0x400 = 1.0
-    // 0x4CD ≈ 1.2
-
-    apply_vi_y_scale(0x355, 0);
-
-    #endif
+#if defined(PRESET_PAL_1996) || defined(PRESET_PAL_1997)
+    // Reposition active video window for PAL frame timing.
+    // libdragon initializes VI_V_VIDEO for NTSC blanking (V_START=0x025).
+    // PAL blanking ends later (V_START=0x05F); without this correction the
+    // active region is mispositioned and the bottom of the framebuffer
+    // produces garbage output.
+    // V_START=0x05F (95 half-lines), V_END=0x23F (575 half-lines) = 240 lines.
+    // Note: VI_V_VIDEO is latched at frame start; takes effect next frame.
+    *REG_VI_V_VIDEO = (0x05FUL << 16) | 0x23FUL;
+#endif
 
     joypad_init();
     debug_init_usblog();
@@ -547,21 +434,12 @@ int main(void)
     int leap_a  = preset->default_leap_a;
     int leap_b  = preset->default_leap_b;
     int s       = preset->vi_s;
-    int voff    = vi_vertical_offset(PAL_V_SCALE);
-
-    surface_t *disp = display_get();
-
-    draw_color_bars(disp, voff);
-    draw_overlay(disp, h_total, pat, leap_a, leap_b, s, voff);
-
-    display_show(disp);
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
     log_values(h_total, pat, leap_a, leap_b, s);
 
     while (1) {
         joypad_poll();
-
         joypad_buttons_t keys = joypad_get_buttons_pressed(JOYPAD_PORT_1);
 
         bool changed = false;
@@ -570,27 +448,22 @@ int main(void)
         if (keys.d_down)  { h_total--; changed = true; }
         if (keys.d_right) { pat++;     changed = true; }
         if (keys.d_left)  { pat--;     changed = true; }
-
         if (keys.c_up)    { leap_a++;  changed = true; }
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-
         if (keys.l) { s = preset->vi_s;     changed = true; }
         if (keys.r) { s = preset->vi_s - 1; changed = true; }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
-
             apply_vi_timing(h_total, pat, leap_a, leap_b, s);
             log_values(h_total, pat, leap_a, leap_b, s);
         }
 
         surface_t *disp = display_get();
-
-        draw_color_bars(disp, voff);
-        draw_overlay(disp, h_total, pat, leap_a, leap_b, s, voff);
-
+        draw_color_bars(disp);
+        draw_overlay(disp, h_total, pat, leap_a, leap_b, s);
         display_show(disp);
     }
 
