@@ -381,7 +381,7 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 20;
 
-    graphics_draw_text(disp, preset->safe_x + 10, y, "L/R - even/odd halflines (P/I)");
+    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R - even/odd halflines (P/I)");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  DPAD L/R: PAT");
     y += 12;
