@@ -17,6 +17,7 @@ jobs:
           - MPAL_PREVIEW
           - PAL_1996
           - PAL_1997
+          - PAL60
 
     env:
       N64_INST: /n64_toolchain
