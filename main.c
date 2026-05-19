@@ -239,15 +239,16 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
 // ---------------------------------------------------------------------------
 
 typedef struct {
-    int fh_int;
-    int fh_frac;
-    int fv_int;
-    int fv_frac;
+    double fh;        // full-precision horizontal frequency
+    double fv;        // full-precision vertical frequency
+
     int delta_a;
     int delta_b;
+
     int avg_whole;
     int avg_tenths;
 } timing_t;
+
 
 static timing_t compute_timing(
     const preset_t *p,
@@ -259,20 +260,20 @@ static timing_t compute_timing(
 {
     timing_t t = {0};
 
-    long long den_h = p->fvi_den * (long long)h_total;
+    // Horizontal frequency (Hz)
+    double den_h = (double)p->fvi_den * (double)h_total;
+    t.fh = (double)p->fvi_num / den_h;
 
-    t.fh_int  = (int)(p->fvi_num / den_h);
-    t.fh_frac = (int)((p->fvi_num % den_h) * 100LL / den_h);
+    // Vertical frequency (Hz)
+    double fv_num = 2.0 * (double)p->fvi_num;
+    double fv_den = den_h * (double)s;
+    t.fv = fv_num / fv_den;
 
-    long long fv_num = 2LL * p->fvi_num;
-    long long fv_den = den_h * (long long)s;
-
-    t.fv_int  = (int)(fv_num / fv_den);
-    t.fv_frac = (int)((fv_num % fv_den) * 100LL / fv_den);
-
+    // Leap deltas
     t.delta_a = leap_a - h_total;
     t.delta_b = leap_b - h_total;
 
+    // Average extra clocks per VSYNC (your existing logic)
     int total_extra = 0;
     for (int i = 0; i < 5; i++)
         total_extra += ((pat >> i) & 1) ? t.delta_b : t.delta_a;
@@ -328,11 +329,17 @@ static void draw_overlay(
 
     int y = preset->safe_y;
 
+// ---------------------------------------------------------------------------
+
     graphics_set_color(graphics_make_color(0, 0, 0, 255), 0);
+
+// ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
     graphics_draw_text(disp, preset->safe_x + 54, y, buf);
     y += 36;
+
+// ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), "     H_TOTAL: %d", h_total);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
@@ -361,13 +368,17 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
-    snprintf(buf, sizeof(buf), "         ~fV: %d.%02d Hz", t.fv_int, t.fv_frac);
+// ---------------------------------------------------------------------------
+
+    snprintf(buf, sizeof(buf), "         ~fV: %.7f Hz", t.fv);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "         ~fH: %d.%02d Hz", t.fh_int, t.fh_frac);
+    snprintf(buf, sizeof(buf), "         ~fH: %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
+
+// ---------------------------------------------------------------------------
 
     snprintf(buf, sizeof(buf), " REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
@@ -380,6 +391,8 @@ static void draw_overlay(
     snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 20;
+
+// ---------------------------------------------------------------------------
 
     graphics_draw_text(disp, preset->safe_x + 10, y, " L/R: even/odd halflines (P/I) ");
     y += 12;
