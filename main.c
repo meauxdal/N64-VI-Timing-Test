@@ -239,8 +239,8 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
 // ---------------------------------------------------------------------------
 
 typedef struct {
-    double fh;        // full-precision horizontal frequency
-    double fv;        // full-precision vertical frequency
+    double fh;
+    double fv;
 
     int delta_a;
     int delta_b;
@@ -260,27 +260,28 @@ static timing_t compute_timing(
 {
     timing_t t = {0};
 
-    // Horizontal frequency (Hz)
-    double den_h = (double)p->fvi_den * (double)h_total;
-    t.fh = (double)p->fvi_num / den_h;
-
-    // Vertical frequency (Hz)
-    double fv_num = 2.0 * (double)p->fvi_num;
-    double fv_den = den_h * (double)s;
-    t.fv = fv_num / fv_den;
-
     // Leap deltas
     t.delta_a = leap_a - h_total;
     t.delta_b = leap_b - h_total;
 
-    // Average extra clocks per VSYNC (your existing logic)
+    // Total extra clocks over the 5-VSYNC leap cycle
     int total_extra = 0;
     for (int i = 0; i < 5; i++)
         total_extra += ((pat >> i) & 1) ? t.delta_b : t.delta_a;
 
+    // Average extra clocks per VSYNC display field (whole.tenths)
     int avg10 = total_extra * 2;
     t.avg_whole  = avg10 / 10;
     t.avg_tenths = avg10 % 10;
+
+    // Leap-adjusted average line length:
+    //   L_avg = (5 * L * S + 2 * total_extra) / (5 * S)
+    double fvi   = (double)p->fvi_num / (double)p->fvi_den;
+    double l_avg = (5.0 * (double)h_total * (double)s + 2.0 * (double)total_extra)
+                   / (5.0 * (double)s);
+
+    t.fh = fvi / l_avg;
+    t.fv = 2.0 * fvi / ((double)s * l_avg);
 
     return t;
 }
