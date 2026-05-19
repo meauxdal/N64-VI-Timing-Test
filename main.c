@@ -412,7 +412,7 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
     debugf(
         "S=%d(%s) H_TOTAL=%d PAT=%d(0b%c%c%c%c%c) "
         "LEAP_A=%d LEAP_B=%d dA=%d dB=%d "
-        "avg=%d.%d ~fH=%d.%02d ~fV=%d.%02d | "
+        "avg=%d.%d ~fH=%.10f ~fV=%.10f | "
         "REG_VT=0x%08lX REG_HT=0x%08lX REG_LEAP=0x%08lX\n",
 
         s,
@@ -428,8 +428,7 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
         leap_a, leap_b,
         t.delta_a, t.delta_b,
         t.avg_whole, t.avg_tenths,
-        t.fh_int, t.fh_frac,
-        t.fv_int, t.fv_frac,
+        t.fh, t.fv,
 
         (unsigned long)*REG_VI_V_TOTAL,
         (unsigned long)*REG_VI_H_TOTAL,
