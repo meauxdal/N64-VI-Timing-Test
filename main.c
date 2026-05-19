@@ -417,7 +417,7 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
         "REG_VT=0x%08lX REG_HT=0x%08lX REG_LEAP=0x%08lX\n",
 
         s,
-        (s == preset->vi_s) ? "P" : "I*",
+        (s == preset->vi_s) ? "P" : "I",
         h_total, pat,
 
         (pat >> 4) & 1 ? '1' : '0',

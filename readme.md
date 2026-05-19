@@ -53,6 +53,7 @@ ntsc
 pal
 - **pal_1996** - original pal profile (libdragon)
 - **pal_1997** - "corrected" pal profile in libultra (not used in libdragon)
+- **pal60** - libdragon's pal60 profile
 
 ---
 
@@ -65,5 +66,3 @@ other VI registers are not (intentionally) touched. SERRATE, BURST, etc. i only 
 ---
 
 using libdragon trunk, in case that makes a difference (i don't think it does for this)
-
-
