@@ -2,6 +2,8 @@
 
 [![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
 
+![alt text](mpal_math.png)
+
 this tool allows adjusting VI timing values in real time to observe hardware effects. in particular, the initial goal is to be able to quickly iterate appropriate presets for MPAL
 
 see https://github.com/DragonMinded/libdragon/issues/884 for more details.
