@@ -302,13 +302,13 @@ static timing_t compute_timing(
 static void draw_color_bars(surface_t *disp)
 {
     static const uint8_t bars[7][3] = {
-        {191, 191, 191},  // 75% gray
-        {191, 191,  16},  // yellow
-        { 16, 191, 191},  // cyan
-        { 16, 191,  16},  // green
-        {191,  16, 191},  // magenta
-        {191,  16,  16},  // red
-        { 16,  16, 191},  // blue
+        {255, 255, 255},  // white
+        {255, 255,   0},  // yellow
+        {  0, 255, 255},  // cyan
+        {  0, 255,   0},  // green
+        {255,   0, 255},  // magenta
+        {255,   0,   0},  // red
+        {  0,   0, 255},  // blue
     };
 
     int bar_w = preset->fb_width / 7;
