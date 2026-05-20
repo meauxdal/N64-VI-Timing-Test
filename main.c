@@ -236,7 +236,7 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
         (((leap_a - 1) & 0xFFF) << 16) |
         ((leap_b - 1) & 0xFFF)
     );
-    
+
     // Set or clear SERRATE (bit 6 of VI_CTRL) based on scan type.
     // Interlaced = odd s; progressive = even s.
     uint32_t ctrl = *REG_VI_CTRL;
@@ -515,7 +515,7 @@ int main(void)
         // so the two fields composite correctly rather than bobbing.
         // Progressive: restore 1:1 scale with no offset.
         if (s % 2 == 1) {
-            int field = *REG_VI_V_CURRENT & 1;
+            int field = *VI_V_CURRENT & 1;
             *REG_VI_Y_SCALE = (field ? (0x200u << 16) : 0u) | 0x400u;
         } else {
             *REG_VI_Y_SCALE = 0x400u;
