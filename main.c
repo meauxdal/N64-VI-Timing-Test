@@ -7,6 +7,8 @@
 #define REG_VI_H_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x1C))
 #define REG_VI_H_TOTAL_LEAP ((volatile uint32_t*)(VI_BASE + 0x20))
 #define REG_VI_V_VIDEO      ((volatile uint32_t*)(VI_BASE + 0x28))
+#define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
+#define REG_VI_Y_SCALE      ((volatile uint32_t*)(VI_BASE + 0x34))
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -234,6 +236,15 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
         (((leap_a - 1) & 0xFFF) << 16) |
         ((leap_b - 1) & 0xFFF)
     );
+
+    // Set or clear SERRATE (bit 6 of VI_CTRL) based on scan type.
+    // Interlaced = odd s; progressive = even s.
+    uint32_t ctrl = *REG_VI_CTRL;
+    if (s % 2 == 1)
+        ctrl |=  (1u << 6);
+    else
+        ctrl &= ~(1u << 6);
+    *REG_VI_CTRL = ctrl;
 }
 
 // ---------------------------------------------------------------------------
@@ -291,13 +302,13 @@ static timing_t compute_timing(
 static void draw_color_bars(surface_t *disp)
 {
     static const uint8_t bars[7][3] = {
-        {255, 255, 255},
-        {255, 255,   0},
-        {  0, 255, 255},
-        {  0, 255,   0},
-        {255,   0, 255},
-        {255,   0,   0},
-        {  0,   0, 255},
+        {255, 255, 255},  // white
+        {255, 255,   0},  // yellow
+        {  0, 255, 255},  // cyan
+        {  0, 255,   0},  // green
+        {255,   0, 255},  // magenta
+        {255,   0,   0},  // red
+        {  0,   0, 255},  // blue
     };
 
     int bar_w = preset->fb_width / 7;
@@ -412,9 +423,9 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 
     debugf(
         "S=%d(%s) H_TOTAL=%d PAT=%d(0b%c%c%c%c%c) "
-        "LEAP_A=%d LEAP_B=%d dA=%d dB=%d "
-        "avg=%d.%d ~fH=%.10f ~fV=%.10f | "
-        "REG_VT=0x%08lX REG_HT=0x%08lX REG_LEAP=0x%08lX\n",
+        "LEAP_A=%d LEAP_B=%d deltaA=%d deltaB=%d "
+        "avg=%d.%d ~fH=%.6f ~fV=%.6f | "
+        "VI_V_TOTAL=0x%08lX VI_H_TOTAL=0x%08lX VI_H_TOTAL_LEAP=0x%08lX\n",
 
         s,
         (s == preset->vi_s) ? "P" : "I",
@@ -498,6 +509,18 @@ int main(void)
         }
 
         surface_t *disp = display_get();
+
+        // Per-field Y_OFFSET correction.
+        // Interlaced: offset the odd field by half a scanline (0x200 in 0.10 format)
+        // so the two fields composite correctly rather than bobbing.
+        // Progressive: restore 1:1 scale with no offset.
+        if (s % 2 == 1) {
+            int field = *VI_V_CURRENT & 1;
+            *REG_VI_Y_SCALE = (field ? (0x200u << 16) : 0u) | 0x400u;
+        } else {
+            *REG_VI_Y_SCALE = 0x400u;
+        }
+
         draw_color_bars(disp);
         draw_overlay(disp, h_total, pat, leap_a, leap_b, s);
         display_show(disp);
