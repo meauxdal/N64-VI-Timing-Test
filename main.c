@@ -9,6 +9,8 @@
 #define REG_VI_V_VIDEO      ((volatile uint32_t*)(VI_BASE + 0x28))
 #define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
 #define REG_VI_Y_SCALE      ((volatile uint32_t*)(VI_BASE + 0x34))
+#define REG_VI_V_BURST      ((volatile uint32_t*)(VI_BASE + 0x0C))
+#define REG_VI_CURRENT      ((volatile uint32_t*)(VI_BASE + 0x10))
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -70,8 +72,8 @@ static const preset_t preset_mpal_math __attribute__((unused)) = {
 
     .default_h_total = 3091,
     .default_pat     = 0,
-    .default_leap_a  = 3091,
-    .default_leap_b  = 3091,
+    .default_leap_a  = 3098,
+    .default_leap_b  = 3096,
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
@@ -349,7 +351,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
     graphics_draw_text(disp, preset->safe_x + 54, y, buf);
-    y += 36;
+    y += 24;
 
 // ---------------------------------------------------------------------------
 
@@ -406,7 +408,9 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R: even/odd halflines (P/I) ");
+    graphics_draw_text(disp, preset->safe_x + 10, y, "        A: RESET V_BURST        ");
+    y += 12;
+    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R: PROGRESSIVE / INTTERLACED ");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
     y += 12;
@@ -483,6 +487,22 @@ int main(void)
     int s       = preset->vi_s;
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
+
+    static void reset_vburst_phase(void)
+    {
+        // MPAL field-relative burst values observed in libdragon workaround.
+        // Even/odd field chosen from current VI field parity.
+
+        static const uint32_t vburst_mpal[2] = {
+            ((11 & 0x3FF) << 20) | (514 & 0x3FF),
+            ((14 & 0x3FF) << 20) | (516 & 0x3FF),
+        };
+
+        int field = *REG_VI_CURRENT & 1;
+
+        *REG_VI_V_BURST = vburst_mpal[field];
+    }
+
     log_values(h_total, pat, leap_a, leap_b, s);
 
     while (1) {
@@ -499,8 +519,10 @@ int main(void)
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-        if (keys.l) { s = preset->vi_s;     changed = true; }
-        if (keys.r) { s = preset->vi_s - 1; changed = true; }
+        if (keys.l)       { s = preset->vi_s;     changed = true; }
+        if (keys.r)       { s = preset->vi_s - 1; changed = true; }
+
+        if (keys.a)       { reset_vburst_phase(); }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
