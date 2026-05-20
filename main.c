@@ -423,9 +423,9 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 
     debugf(
         "S=%d(%s) H_TOTAL=%d PAT=%d(0b%c%c%c%c%c) "
-        "LEAP_A=%d LEAP_B=%d dA=%d dB=%d "
-        "avg=%d.%d ~fH=%.10f ~fV=%.10f | "
-        "REG_VT=0x%08lX REG_HT=0x%08lX REG_LEAP=0x%08lX\n",
+        "LEAP_A=%d LEAP_B=%d deltaA=%d deltaB=%d "
+        "avg=%d.%d ~fH=%.6f ~fV=%.6f | "
+        "VI_V_TOTAL=0x%08lX VI_H_TOTAL=0x%08lX VI_H_TOTAL_LEAP=0x%08lX\n",
 
         s,
         (s == preset->vi_s) ? "P" : "I",
