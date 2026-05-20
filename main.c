@@ -73,7 +73,7 @@ static const preset_t preset_mpal_math __attribute__((unused)) = {
     .default_h_total = 3091,
     .default_pat     = 0,
     .default_leap_a  = 3098,
-    .default_leap_b  = 3096,
+    .default_leap_b  = 3098,
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
@@ -116,6 +116,27 @@ static const preset_t preset_mpal_preview __attribute__((unused)) = {
     .default_pat     = 0,
     .default_leap_a  = 3101,
     .default_leap_b  = 3101,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 16,
+};
+
+static const preset_t preset_mpal_int __attribute__((unused)) = {
+    .name = "MPAL_INT",
+
+    .fvi_num = 6953850000LL,
+    .fvi_den = 143LL,
+
+    .vi_s = 526,
+
+    .default_h_total = 3091,
+    .default_pat     = 0,
+    .default_leap_a  = 3096,
+    .default_leap_b  = 3096,
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
@@ -198,6 +219,8 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
     #define ACTIVE_PRESET preset_mpal_old
 #elif defined(PRESET_MPAL_PREVIEW)
     #define ACTIVE_PRESET preset_mpal_preview
+#elif defined(PRESET_MPAL_INT)
+    #define ACTIVE_PRESET preset_mpal_int
 #elif defined(PRESET_PAL_1996)
     #define ACTIVE_PRESET preset_pal_1996
 #elif defined(PRESET_PAL_1997)
@@ -410,7 +433,7 @@ static void draw_overlay(
 
     graphics_draw_text(disp, preset->safe_x + 10, y, "        A: RESET V_BURST        ");
     y += 12;
-    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R: PROGRESSIVE / INTTERLACED ");
+    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R:  PROGRESSIVE / INTERLACED ");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
     y += 12;

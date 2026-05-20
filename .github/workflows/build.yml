@@ -15,6 +15,7 @@ jobs:
           - MPAL_MATH
           - MPAL_OLD
           - MPAL_PREVIEW
+          - MPAL_INT
           - PAL_1996
           - PAL_1997
           - PAL60
