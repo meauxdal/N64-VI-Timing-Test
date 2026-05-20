@@ -456,6 +456,21 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 // main
 // ---------------------------------------------------------------------------
 
+static void reset_vburst_phase(void)
+{
+// MPAL field-relative burst values observed in libdragon workaround.
+// Even/odd field chosen from current VI field parity.
+
+static const uint32_t vburst_mpal[2] = {
+    ((11 & 0x3FF) << 20) | (514 & 0x3FF),
+    ((14 & 0x3FF) << 20) | (516 & 0x3FF),
+};
+
+int field = *REG_VI_CURRENT & 1;
+
+*REG_VI_V_BURST = vburst_mpal[field];
+}
+
 int main(void)
 {
     display_init(
@@ -487,21 +502,6 @@ int main(void)
     int s       = preset->vi_s;
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
-
-    static void reset_vburst_phase(void)
-    {
-        // MPAL field-relative burst values observed in libdragon workaround.
-        // Even/odd field chosen from current VI field parity.
-
-        static const uint32_t vburst_mpal[2] = {
-            ((11 & 0x3FF) << 20) | (514 & 0x3FF),
-            ((14 & 0x3FF) << 20) | (516 & 0x3FF),
-        };
-
-        int field = *REG_VI_CURRENT & 1;
-
-        *REG_VI_V_BURST = vburst_mpal[field];
-    }
 
     log_values(h_total, pat, leap_a, leap_b, s);
 
@@ -537,7 +537,7 @@ int main(void)
         // so the two fields composite correctly rather than bobbing.
         // Progressive: restore 1:1 scale with no offset.
         if (s % 2 == 1) {
-            int field = *VI_V_CURRENT & 1;
+            int field = *REG_VI_CURRENT & 1;
             *REG_VI_Y_SCALE = (field ? (0x200u << 16) : 0u) | 0x400u;
         } else {
             *REG_VI_Y_SCALE = 0x400u;
