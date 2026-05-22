@@ -2,7 +2,7 @@
 
 [![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
 
-![alt text](mpal_math.png)
+![NTSC](NTSC-v2.0.png)
 
 this tool allows adjusting VI timing values in real time to observe hardware effects. in particular, the initial goal is to be able to quickly iterate appropriate presets for MPAL
 
@@ -48,7 +48,6 @@ this tool works very similarly to the [VI timing calculator](https://meauxdal.ne
 - c-up & c-down: increases or decreases LEAP_A
 - c-right & c-left: increases or decreases LEAP_B
 - L/R buttons: L = progressive (default), R = interlaced
-- A button: "resets" V_BURST - maybe this has some impact on the MPAL color bug
 
 LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas. this can easily be changed if desired.
 
