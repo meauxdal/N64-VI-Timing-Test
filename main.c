@@ -402,6 +402,7 @@ static void draw_overlay(
     uint32_t reg_vt   = *REG_VI_V_TOTAL;
     uint32_t reg_ht   = *REG_VI_H_TOTAL;
     uint32_t reg_leap = *REG_VI_H_TOTAL_LEAP;
+    uint32_t reg_vb   = *REG_VI_V_BURST;
 
     int y = preset->safe_y;
 
@@ -421,8 +422,7 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "    LEAP PAT: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "LEAP PATTERN: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -446,11 +446,11 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "         ~fV: %.7f Hz", t.fv);
+    snprintf(buf, sizeof(buf), "REFRESH (fV): %.7f Hz", t.fv);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "         ~fH: %.4f Hz", t.fh);
+    snprintf(buf, sizeof(buf), "   LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
@@ -466,6 +466,10 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 12;
+
+    snprintf(buf, sizeof(buf), "  REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 20;
 
 // ---------------------------------------------------------------------------
@@ -474,7 +478,7 @@ static void draw_overlay(
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
     y += 12;
-    graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD L/R: PAT      C L/R: LEAP_B");
+    graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD L/R: PATTERN  C L/R: LEAP_B");
 }
 
 // ---------------------------------------------------------------------------
