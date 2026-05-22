@@ -47,7 +47,7 @@ this tool works very similarly to the [VI timing calculator](https://meauxdal.ne
 - d-pad right & left: increases or decreases the leap pattern (0-31)
 - c-up & c-down: increases or decreases LEAP_A
 - c-right & c-left: increases or decreases LEAP_B
-- L/R buttons: L = progressive (default), R = interlaced
+- L/R buttons: L = progressive, R = interlaced
 
 LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas. this can easily be changed if desired.
 
