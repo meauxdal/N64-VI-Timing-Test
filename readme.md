@@ -12,7 +12,7 @@ see https://github.com/DragonMinded/libdragon/issues/884 for more details.
 
 initial testing shows promise with the following profiles, per N64brew Discord PAL-M tester AAIC:
 
-**MPAL progressive:**  
+**MPAL_MATH (progressive):**  
 H_TOTAL 3091  
 LEAP pattern: 0  
 LEAP_A: 3098  
@@ -26,7 +26,7 @@ LEAP_B: 774.50
 
 ---
 
-**MPAL interlaced:**  
+**MPAL_INT (interlaced):**  
 H_TOTAL: 3091  
 LEAP pattern: 0  
 LEAP_A: 3096  
@@ -57,7 +57,8 @@ LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore ne
 each ROM has different default values:
 
 mpal
-- **mpal_math** - closest to nominal line frequency updated to use a LEAP_A delta of +7 by default which may be a sweet spot (+5 for interlaced, currently need to set that manually)
+- **mpal_math** - mpal progressive; closest to nominal line frequency updated to use a LEAP_A delta of +7 
+- **mpal_int** - mpal interlaced; closest to nominal line frequency updated to use a LEAP_A delta of +5
 - **mpal_old** - the old mpal progressive-only profile - no longer exists in libdragon preview
 - **mpal_preview** - the old mpal interlaced-only profile. applies to both interlaced and progressive in libdragon preview
 
@@ -71,7 +72,9 @@ pal
 
 ---
 
-right now on earlier MPAL motherboards - at least NUS-CPU(M)-01 and 02 - when you switch from interlaced and then back to progressive, the color decoding will wig out (as it does on some retail 480i games like Mystical Ninja JP) and the upper part of the screen will appear as the wrong color. i am investigating this in particular in more detail now. the bug is mentioned in libdragon source here: https://github.com/DragonMinded/libdragon/blob/preview/src/vi.c#L274
+some versions of the ROM trigger the color bug on early MPAL units mentioned here: https://github.com/DragonMinded/libdragon/blob/preview/src/vi.c#L274
+
+this is hopefully fixed now, though.
 
 ---
 
