@@ -1,13 +1,9 @@
 N64_INST = /n64_toolchain
 PROG_NAME = vi_timing_test
 
-# Select a timing preset at build time:
-#   make                      — NTSC (default)
-#   make PRESET=MPAL_MATH
-#   make PRESET=MPAL_OLD
-#   make PRESET=MPAL_PREVIEW
-#   make PRESET=PAL_1996
-#   make PRESET=PAL_1997
+# Select a timing preset at build time. e.g.:
+#   make                      - NTSC (default)
+#   make PRESET=MPAL_MATH     - MPAL (Math preset)
 PRESET ?= NTSC
 
 CFLAGS += -DPRESET_$(PRESET)

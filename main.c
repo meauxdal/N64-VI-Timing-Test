@@ -9,6 +9,8 @@
 #define REG_VI_V_VIDEO      ((volatile uint32_t*)(VI_BASE + 0x28))
 #define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
 #define REG_VI_Y_SCALE      ((volatile uint32_t*)(VI_BASE + 0x34))
+#define REG_VI_V_BURST      ((volatile uint32_t*)(VI_BASE + 0x0C))
+#define REG_VI_CURRENT      ((volatile uint32_t*)(VI_BASE + 0x10))
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -20,7 +22,9 @@ typedef struct {
     long long fvi_num;
     long long fvi_den;
 
-    int vi_s;
+    int s_progressive;
+    int s_interlaced;
+    int default_s;
 
     int default_h_total;
     int default_pat;
@@ -45,7 +49,9 @@ static const preset_t preset_ntsc __attribute__((unused)) = {
     .fvi_num = 535500000LL,
     .fvi_den = 11LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3094,
     .default_pat     = 0,
@@ -66,12 +72,14 @@ static const preset_t preset_mpal_math __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3091,
     .default_pat     = 0,
-    .default_leap_a  = 3091,
-    .default_leap_b  = 3091,
+    .default_leap_a  = 3098,
+    .default_leap_b  = 3098,
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
@@ -87,7 +95,9 @@ static const preset_t preset_mpal_old __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3090,
     .default_pat     = 4,
@@ -108,12 +118,37 @@ static const preset_t preset_mpal_preview __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3089,
     .default_pat     = 0,
     .default_leap_a  = 3101,
     .default_leap_b  = 3101,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 16,
+};
+
+static const preset_t preset_mpal_int __attribute__((unused)) = {
+    .name = "MPAL_INT",
+
+    .fvi_num = 6953850000LL,
+    .fvi_den = 143LL,
+
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 525,
+
+    .default_h_total = 3091,
+    .default_pat     = 0,
+    .default_leap_a  = 3096,
+    .default_leap_b  = 3096,
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
@@ -129,7 +164,9 @@ static const preset_t preset_pal_1996 __attribute__((unused)) = {
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
 
-    .vi_s = 626,
+    .s_progressive = 626,
+    .s_interlaced  = 625,
+    .default_s     = 626,
 
     .default_h_total = 3178,
     .default_pat     = 21,
@@ -150,7 +187,9 @@ static const preset_t preset_pal_1997 __attribute__((unused)) = {
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
 
-    .vi_s = 626,
+    .s_progressive = 626,
+    .s_interlaced  = 625,
+    .default_s     = 626,
 
     .default_h_total = 3178,
     .default_pat     = 23,
@@ -171,7 +210,9 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3156,
     .default_pat     = 0,
@@ -196,6 +237,8 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
     #define ACTIVE_PRESET preset_mpal_old
 #elif defined(PRESET_MPAL_PREVIEW)
     #define ACTIVE_PRESET preset_mpal_preview
+#elif defined(PRESET_MPAL_INT)
+    #define ACTIVE_PRESET preset_mpal_int
 #elif defined(PRESET_PAL_1996)
     #define ACTIVE_PRESET preset_pal_1996
 #elif defined(PRESET_PAL_1997)
@@ -209,16 +252,29 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
 static const preset_t *preset = &ACTIVE_PRESET;
 
 // ---------------------------------------------------------------------------
+// MPAL-only: restore V_BURST for progressive modes to prevent color breakage
+// when switching back from interlaced.
+// ---------------------------------------------------------------------------
+
+#if defined(PRESET_MPAL_MATH) || defined(PRESET_MPAL_OLD) || \
+    defined(PRESET_MPAL_PREVIEW) || defined(PRESET_MPAL_INT)
+static inline void restore_progressive_vburst(void)
+{
+    *REG_VI_V_BURST = 0x000e0204;
+}
+#endif
+
+// ---------------------------------------------------------------------------
 // Write VI timing registers directly.
 // ---------------------------------------------------------------------------
 
 static void sanitize_timing(int *h_total, int *pat, int *leap_a, int *leap_b)
 {
-    if (*h_total < 1)   *h_total = 1;
-    if (*leap_a < *h_total) *leap_a = *h_total;
-    if (*leap_b < *h_total) *leap_b = *h_total;
-    if (*pat < 0)       *pat = 0;
-    if (*pat > 31)      *pat = 31;
+    if (*h_total < 1)       *h_total = 1;
+    if (*leap_a < *h_total) *leap_a  = *h_total;
+    if (*leap_b < *h_total) *leap_b  = *h_total;
+    if (*pat < 0)           *pat     = 0;
+    if (*pat > 31)          *pat     = 31;
 }
 
 static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
@@ -240,11 +296,19 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
     // Set or clear SERRATE (bit 6 of VI_CTRL) based on scan type.
     // Interlaced = odd s; progressive = even s.
     uint32_t ctrl = *REG_VI_CTRL;
+
     if (s % 2 == 1)
         ctrl |=  (1u << 6);
     else
         ctrl &= ~(1u << 6);
+
     *REG_VI_CTRL = ctrl;
+
+#if defined(PRESET_MPAL_MATH) || defined(PRESET_MPAL_OLD) || \
+    defined(PRESET_MPAL_PREVIEW) || defined(PRESET_MPAL_INT)
+    if (s % 2 == 0)
+        restore_progressive_vburst();
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -338,6 +402,8 @@ static void draw_overlay(
     uint32_t reg_vt   = *REG_VI_V_TOTAL;
     uint32_t reg_ht   = *REG_VI_H_TOTAL;
     uint32_t reg_leap = *REG_VI_H_TOTAL_LEAP;
+    uint32_t reg_vb   = *REG_VI_V_BURST;
+    uint32_t reg_vc   = *REG_VI_CURRENT;
 
     int y = preset->safe_y;
 
@@ -349,7 +415,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
     graphics_draw_text(disp, preset->safe_x + 54, y, buf);
-    y += 36;
+    y += 24;
 
 // ---------------------------------------------------------------------------
 
@@ -357,8 +423,7 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf),
-        "    LEAP PAT: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "LEAP PATTERN: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -382,11 +447,11 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "         ~fV: %.7f Hz", t.fv);
+    snprintf(buf, sizeof(buf), "REFRESH (fV): %.7f Hz", t.fv);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "         ~fH: %.4f Hz", t.fh);
+    snprintf(buf, sizeof(buf), "   LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
@@ -402,15 +467,23 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 20;
+    y += 44;
+
+//    snprintf(buf, sizeof(buf), " REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
+//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+//    y += 12;
+
+//    snprintf(buf, sizeof(buf), " REG_CURRENT: 0x%08lx", (unsigned long)reg_vc);
+//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+//    y += 20;
 
 // ---------------------------------------------------------------------------
 
-    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R: even/odd halflines (P/I) ");
+    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R:  PROGRESSIVE / INTERLACED ");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
     y += 12;
-    graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD L/R: PAT      C L/R: LEAP_B");
+    graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD L/R: PATTERN  C L/R: LEAP_B");
 }
 
 // ---------------------------------------------------------------------------
@@ -428,7 +501,7 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
         "VI_V_TOTAL=0x%08lX VI_H_TOTAL=0x%08lX VI_H_TOTAL_LEAP=0x%08lX\n",
 
         s,
-        (s == preset->vi_s) ? "P" : "I",
+        (s == preset->s_progressive) ? "P" : "I",
         h_total, pat,
 
         (pat >> 4) & 1 ? '1' : '0',
@@ -480,9 +553,10 @@ int main(void)
     int pat     = preset->default_pat;
     int leap_a  = preset->default_leap_a;
     int leap_b  = preset->default_leap_b;
-    int s       = preset->vi_s;
+    int s       = preset->default_s;
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
+
     log_values(h_total, pat, leap_a, leap_b, s);
 
     while (1) {
@@ -499,8 +573,8 @@ int main(void)
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-        if (keys.l) { s = preset->vi_s;     changed = true; }
-        if (keys.r) { s = preset->vi_s - 1; changed = true; }
+        if (keys.l)       { s = preset->s_progressive; changed = true; }
+        if (keys.r)       { s = preset->s_interlaced;  changed = true; }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
@@ -515,7 +589,7 @@ int main(void)
         // so the two fields composite correctly rather than bobbing.
         // Progressive: restore 1:1 scale with no offset.
         if (s % 2 == 1) {
-            int field = *VI_V_CURRENT & 1;
+            int field = *REG_VI_CURRENT & 1;
             *REG_VI_Y_SCALE = (field ? (0x200u << 16) : 0u) | 0x400u;
         } else {
             *REG_VI_Y_SCALE = 0x400u;
