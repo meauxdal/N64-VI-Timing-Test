@@ -403,6 +403,7 @@ static void draw_overlay(
     uint32_t reg_ht   = *REG_VI_H_TOTAL;
     uint32_t reg_leap = *REG_VI_H_TOTAL_LEAP;
     uint32_t reg_vb   = *REG_VI_V_BURST;
+    uint32_t reg_vc   = *REG_VI_CURRENT;
 
     int y = preset->safe_y;
 
@@ -468,7 +469,11 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "  REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
+    snprintf(buf, sizeof(buf), " REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 12;
+
+    snprintf(buf, sizeof(buf), " REG_CURRENT: 0x%08lx", (unsigned long)reg_vc);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 20;
 
