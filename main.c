@@ -22,7 +22,9 @@ typedef struct {
     long long fvi_num;
     long long fvi_den;
 
-    int vi_s;
+    int s_progressive;
+    int s_interlaced;
+    int default_s;
 
     int default_h_total;
     int default_pat;
@@ -47,7 +49,9 @@ static const preset_t preset_ntsc __attribute__((unused)) = {
     .fvi_num = 535500000LL,
     .fvi_den = 11LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3094,
     .default_pat     = 0,
@@ -68,7 +72,9 @@ static const preset_t preset_mpal_math __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3091,
     .default_pat     = 0,
@@ -89,7 +95,9 @@ static const preset_t preset_mpal_old __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3090,
     .default_pat     = 4,
@@ -110,7 +118,9 @@ static const preset_t preset_mpal_preview __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3089,
     .default_pat     = 0,
@@ -131,7 +141,9 @@ static const preset_t preset_mpal_int __attribute__((unused)) = {
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 525,
 
     .default_h_total = 3091,
     .default_pat     = 0,
@@ -152,7 +164,9 @@ static const preset_t preset_pal_1996 __attribute__((unused)) = {
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
 
-    .vi_s = 626,
+    .s_progressive = 626,
+    .s_interlaced  = 625,
+    .default_s     = 626,
 
     .default_h_total = 3178,
     .default_pat     = 21,
@@ -173,7 +187,9 @@ static const preset_t preset_pal_1997 __attribute__((unused)) = {
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
 
-    .vi_s = 626,
+    .s_progressive = 626,
+    .s_interlaced  = 625,
+    .default_s     = 626,
 
     .default_h_total = 3178,
     .default_pat     = 23,
@@ -194,7 +210,9 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
 
-    .vi_s = 526,
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
 
     .default_h_total = 3156,
     .default_pat     = 0,
@@ -234,16 +252,29 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
 static const preset_t *preset = &ACTIVE_PRESET;
 
 // ---------------------------------------------------------------------------
+// MPAL-only: restore V_BURST for progressive modes to prevent color breakage
+// when switching back from interlaced.
+// ---------------------------------------------------------------------------
+
+#if defined(PRESET_MPAL_MATH) || defined(PRESET_MPAL_OLD) || \
+    defined(PRESET_MPAL_PREVIEW) || defined(PRESET_MPAL_INT)
+static inline void restore_progressive_vburst(void)
+{
+    *REG_VI_V_BURST = 0x000e0204;
+}
+#endif
+
+// ---------------------------------------------------------------------------
 // Write VI timing registers directly.
 // ---------------------------------------------------------------------------
 
 static void sanitize_timing(int *h_total, int *pat, int *leap_a, int *leap_b)
 {
-    if (*h_total < 1)   *h_total = 1;
-    if (*leap_a < *h_total) *leap_a = *h_total;
-    if (*leap_b < *h_total) *leap_b = *h_total;
-    if (*pat < 0)       *pat = 0;
-    if (*pat > 31)      *pat = 31;
+    if (*h_total < 1)       *h_total = 1;
+    if (*leap_a < *h_total) *leap_a  = *h_total;
+    if (*leap_b < *h_total) *leap_b  = *h_total;
+    if (*pat < 0)           *pat     = 0;
+    if (*pat > 31)          *pat     = 31;
 }
 
 static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
@@ -273,10 +304,11 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
 
     *REG_VI_CTRL = ctrl;
 
-    // MPAL progressive must restore required V_BURST
-    // after leaving interlaced mode.
+#if defined(PRESET_MPAL_MATH) || defined(PRESET_MPAL_OLD) || \
+    defined(PRESET_MPAL_PREVIEW) || defined(PRESET_MPAL_INT)
     if (s % 2 == 0)
         restore_progressive_vburst();
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -460,7 +492,7 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
         "VI_V_TOTAL=0x%08lX VI_H_TOTAL=0x%08lX VI_H_TOTAL_LEAP=0x%08lX\n",
 
         s,
-        (s == preset->vi_s) ? "P" : "I",
+        (s == preset->s_progressive) ? "P" : "I",
         h_total, pat,
 
         (pat >> 4) & 1 ? '1' : '0',
@@ -483,11 +515,6 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 // ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
-
-static inline void restore_progressive_vburst(void)
-{
-    *REG_VI_V_BURST = 0x000e0204;
-}
 
 int main(void)
 {
@@ -517,7 +544,7 @@ int main(void)
     int pat     = preset->default_pat;
     int leap_a  = preset->default_leap_a;
     int leap_b  = preset->default_leap_b;
-    int s       = preset->vi_s;
+    int s       = preset->default_s;
 
     apply_vi_timing(h_total, pat, leap_a, leap_b, s);
 
@@ -537,8 +564,8 @@ int main(void)
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-        if (keys.l)       { s = preset->vi_s;     changed = true; }
-        if (keys.r)       { s = preset->vi_s - 1; changed = true; }
+        if (keys.l)       { s = preset->s_progressive; changed = true; }
+        if (keys.r)       { s = preset->s_interlaced;  changed = true; }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
