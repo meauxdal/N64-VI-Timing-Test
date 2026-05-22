@@ -467,15 +467,15 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 12;
+    y += 44;
 
-    snprintf(buf, sizeof(buf), " REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 12;
+//    snprintf(buf, sizeof(buf), " REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
+//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+//    y += 12;
 
-    snprintf(buf, sizeof(buf), " REG_CURRENT: 0x%08lx", (unsigned long)reg_vc);
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 20;
+//    snprintf(buf, sizeof(buf), " REG_CURRENT: 0x%08lx", (unsigned long)reg_vc);
+//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+//    y += 20;
 
 // ---------------------------------------------------------------------------
 
