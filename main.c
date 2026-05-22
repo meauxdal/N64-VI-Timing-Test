@@ -265,11 +265,18 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
     // Set or clear SERRATE (bit 6 of VI_CTRL) based on scan type.
     // Interlaced = odd s; progressive = even s.
     uint32_t ctrl = *REG_VI_CTRL;
+
     if (s % 2 == 1)
         ctrl |=  (1u << 6);
     else
         ctrl &= ~(1u << 6);
+
     *REG_VI_CTRL = ctrl;
+
+    // MPAL progressive must restore required V_BURST
+    // after leaving interlaced mode.
+    if (s % 2 == 0)
+        restore_progressive_vburst();
 }
 
 // ---------------------------------------------------------------------------
@@ -431,8 +438,6 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    graphics_draw_text(disp, preset->safe_x + 10, y, "        A: RESET V_BURST        ");
-    y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, " L/R:  PROGRESSIVE / INTERLACED ");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
@@ -479,19 +484,9 @@ static void log_values(int h_total, int pat, int leap_a, int leap_b, int s)
 // main
 // ---------------------------------------------------------------------------
 
-static void reset_vburst_phase(void)
+static inline void restore_progressive_vburst(void)
 {
-// MPAL field-relative burst values observed in libdragon workaround.
-// Even/odd field chosen from current VI field parity.
-
-static const uint32_t vburst_mpal[2] = {
-    ((11 & 0x3FF) << 20) | (514 & 0x3FF),
-    ((14 & 0x3FF) << 20) | (516 & 0x3FF),
-};
-
-int field = *REG_VI_CURRENT & 1;
-
-*REG_VI_V_BURST = vburst_mpal[field];
+    *REG_VI_V_BURST = 0x000e0204;
 }
 
 int main(void)
@@ -544,8 +539,6 @@ int main(void)
         if (keys.c_left)  { leap_b--;  changed = true; }
         if (keys.l)       { s = preset->vi_s;     changed = true; }
         if (keys.r)       { s = preset->vi_s - 1; changed = true; }
-
-        if (keys.a)       { reset_vburst_phase(); }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
