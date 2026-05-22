@@ -453,6 +453,11 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "   LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 12;
+
+    const char *tv_names[] = {"PAL", "NTSC", "MPAL"};
+    snprintf(buf, sizeof(buf), "     TV TYPE: %s", tv_names[get_tv_type()]);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
 // ---------------------------------------------------------------------------
