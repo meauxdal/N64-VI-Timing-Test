@@ -12,7 +12,7 @@ see https://github.com/DragonMinded/libdragon/issues/884 for more details.
 
 initial testing shows promise with the following profiles, per N64brew Discord PAL-M tester AAIC:
 
-**MPAL_MATH (progressive):**  
+**MPAL_PROG (progressive):**  
 H_TOTAL 3091  
 LEAP pattern: 0  
 LEAP_A: 3098  
@@ -37,8 +37,6 @@ Pattern: 0b00000
 LEAP_A: 774.00  
 LEAP_B: 774.00  
 
-more testing needed. i'm updating the "math" profile in the latest version of the tool to use 3098 for LEAP_A.
-
 ---
 
 this tool works very similarly to the [VI timing calculator](https://meauxdal.neocities.org/n64-vi-calculator). you can adjust VI registers dynamically and see the results:
@@ -47,27 +45,16 @@ this tool works very similarly to the [VI timing calculator](https://meauxdal.ne
 - d-pad right & left: increases or decreases the leap pattern (0-31)
 - c-up & c-down: increases or decreases LEAP_A
 - c-right & c-left: increases or decreases LEAP_B
-- L/R buttons: L = progressive, R = interlaced
 
 LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas. this can easily be changed if desired.
 
 ---
 
-each ROM has different default values:
-
-mpal
-- **mpal_math** - mpal progressive; closest to nominal line frequency updated to use a LEAP_A delta of +7 
-- **mpal_int** - mpal interlaced; closest to nominal line frequency updated to use a LEAP_A delta of +5
-- **mpal_old** - the old mpal progressive-only profile - no longer exists in libdragon preview
-- **mpal_preview** - the old mpal interlaced-only profile. applies to both interlaced and progressive in libdragon preview
-
-ntsc
-- **ntsc** 
-
-pal
-- **pal_1996** - original pal profile (libdragon)
-- **pal_1997** - "corrected" pal profile in libultra (not used in libdragon)
-- **pal60** - libdragon's pal60 profile
+- INT: interlaced
+- PROG: progressive
+- PAL_1996: original PAL leap configuration
+- PAL_1997: revised PAL leap configuration
+- PAL60: NTSC lines/timing with PAL color
 
 ---
 
