@@ -453,12 +453,12 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "   LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 12;
+    y += 48;
 
-    const char *tv_names[] = {"PAL", "NTSC", "MPAL"};
-    snprintf(buf, sizeof(buf), "     TV TYPE: %s", tv_names[get_tv_type()]);
-    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 16;
+//    const char *tv_names[] = {"PAL", "NTSC", "MPAL"};
+//    snprintf(buf, sizeof(buf), "     TV TYPE: %s", tv_names[get_tv_type()]);
+//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+//    y += 16;
 
 // ---------------------------------------------------------------------------
 
@@ -484,8 +484,8 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R:  PROGRESSIVE / INTERLACED ");
-    y += 12;
+//    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R:  PROGRESSIVE / INTERLACED ");
+//    y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD L/R: PATTERN  C L/R: LEAP_B");
@@ -578,8 +578,8 @@ int main(void)
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-        if (keys.l)       { s = preset->s_progressive; changed = true; }
-        if (keys.r)       { s = preset->s_interlaced;  changed = true; }
+//        if (keys.l)       { s = preset->s_progressive; changed = true; }
+//        if (keys.r)       { s = preset->s_interlaced;  changed = true; }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
