@@ -46,7 +46,7 @@ this tool works very similarly to the [VI timing calculator](https://meauxdal.ne
 - c-up & c-down: increases or decreases LEAP_A
 - c-right & c-left: increases or decreases LEAP_B
 
-LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas. this can easily be changed if desired.
+LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas.
 
 ---
 
