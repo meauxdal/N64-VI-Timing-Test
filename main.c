@@ -498,7 +498,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "    avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 16;
+    y += 24;
 
 // ---------------------------------------------------------------------------
 
@@ -508,7 +508,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "    LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 16;
+    y += 24;
 
 // ---------------------------------------------------------------------------
 
@@ -522,7 +522,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "     REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 32;
+    y += 24;
 
 // ---------------------------------------------------------------------------
 
