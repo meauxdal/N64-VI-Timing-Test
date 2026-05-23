@@ -3,14 +3,14 @@
 
 // VI register addresses (uncached KSEG1) ------------------------------------
 #define VI_BASE             0xA4400000
+#define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
+#define REG_VI_V_BURST      ((volatile uint32_t*)(VI_BASE + 0x0C))
+#define REG_VI_CURRENT      ((volatile uint32_t*)(VI_BASE + 0x10))
 #define REG_VI_V_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x18))
 #define REG_VI_H_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x1C))
 #define REG_VI_H_TOTAL_LEAP ((volatile uint32_t*)(VI_BASE + 0x20))
 #define REG_VI_V_VIDEO      ((volatile uint32_t*)(VI_BASE + 0x28))
-#define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
 #define REG_VI_Y_SCALE      ((volatile uint32_t*)(VI_BASE + 0x34))
-#define REG_VI_V_BURST      ((volatile uint32_t*)(VI_BASE + 0x0C))
-#define REG_VI_CURRENT      ((volatile uint32_t*)(VI_BASE + 0x10))
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -37,37 +37,15 @@ typedef struct {
 
     int safe_x;
     int safe_y;
+
 } preset_t;
 
 // ---------------------------------------------------------------------------
-// Presets
+// MPAL Presets
 // ---------------------------------------------------------------------------
 
-static const preset_t preset_ntsc __attribute__((unused)) = {
-    .name = "NTSC",
-
-    .fvi_num = 535500000LL,
-    .fvi_den = 11LL,
-
-    .s_progressive = 526,
-    .s_interlaced  = 525,
-    .default_s     = 526,
-
-    .default_h_total = 3094,
-    .default_pat     = 0,
-    .default_leap_a  = 3094,
-    .default_leap_b  = 3094,
-
-    .resolution = RESOLUTION_320x240,
-    .fb_width   = 320,
-    .fb_height  = 240,
-
-    .safe_x = 20,
-    .safe_y = 16,
-};
-
-static const preset_t preset_mpal_math __attribute__((unused)) = {
-    .name = "MPAL_MATH",
+static const preset_t preset_mpal_prog __attribute__((unused)) = {
+    .name = "MPAL_PROG",
 
     .fvi_num = 6953850000LL,
     .fvi_den = 143LL,
@@ -80,52 +58,6 @@ static const preset_t preset_mpal_math __attribute__((unused)) = {
     .default_pat     = 0,
     .default_leap_a  = 3098,
     .default_leap_b  = 3098,
-
-    .resolution = RESOLUTION_320x240,
-    .fb_width   = 320,
-    .fb_height  = 240,
-
-    .safe_x = 20,
-    .safe_y = 16,
-};
-
-static const preset_t preset_mpal_old __attribute__((unused)) = {
-    .name = "MPAL_OLD",
-
-    .fvi_num = 6953850000LL,
-    .fvi_den = 143LL,
-
-    .s_progressive = 526,
-    .s_interlaced  = 525,
-    .default_s     = 526,
-
-    .default_h_total = 3090,
-    .default_pat     = 4,
-    .default_leap_a  = 3099,
-    .default_leap_b  = 3098,
-
-    .resolution = RESOLUTION_320x240,
-    .fb_width   = 320,
-    .fb_height  = 240,
-
-    .safe_x = 20,
-    .safe_y = 16,
-};
-
-static const preset_t preset_mpal_preview __attribute__((unused)) = {
-    .name = "MPAL_PREVIEW",
-
-    .fvi_num = 6953850000LL,
-    .fvi_den = 143LL,
-
-    .s_progressive = 526,
-    .s_interlaced  = 525,
-    .default_s     = 526,
-
-    .default_h_total = 3089,
-    .default_pat     = 0,
-    .default_leap_a  = 3101,
-    .default_leap_b  = 3101,
 
     .resolution = RESOLUTION_320x240,
     .fb_width   = 320,
@@ -158,8 +90,85 @@ static const preset_t preset_mpal_int __attribute__((unused)) = {
     .safe_y = 16,
 };
 
-static const preset_t preset_pal_1996 __attribute__((unused)) = {
-    .name = "PAL_1996",
+// ---------------------------------------------------------------------------
+// NTSC Presets
+// ---------------------------------------------------------------------------
+
+static const preset_t preset_ntsc_int __attribute__((unused)) = {
+    .name = "NTSC_INT",
+
+    .fvi_num = 535500000LL,
+    .fvi_den = 11LL,
+
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 525,
+
+    .default_h_total = 3094,
+    .default_pat     = 0,
+    .default_leap_a  = 3094,
+    .default_leap_b  = 3094,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 16,
+};
+
+static const preset_t preset_ntsc_prog __attribute__((unused)) = {
+    .name = "NTSC_PROG",
+
+    .fvi_num = 535500000LL,
+    .fvi_den = 11LL,
+
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 526,
+
+    .default_h_total = 3094,
+    .default_pat     = 0,
+    .default_leap_a  = 3094,
+    .default_leap_b  = 3094,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 16,
+};
+
+// ---------------------------------------------------------------------------
+// PAL 1996 Presets
+// ---------------------------------------------------------------------------
+
+static const preset_t preset_pal_1996_int __attribute__((unused)) = {
+    .name = "PAL_1996_INT",
+
+    .fvi_num = 49656530LL,
+    .fvi_den = 1LL,
+
+    .s_progressive = 626,
+    .s_interlaced  = 625,
+    .default_s     = 625,
+
+    .default_h_total = 3178,
+    .default_pat     = 21,
+    .default_leap_a  = 3183,
+    .default_leap_b  = 3184,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 20,
+};
+
+static const preset_t preset_pal_1996_prog __attribute__((unused)) = {
+    .name = "PAL_1996_PROG",
 
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
@@ -181,8 +190,35 @@ static const preset_t preset_pal_1996 __attribute__((unused)) = {
     .safe_y = 20,
 };
 
-static const preset_t preset_pal_1997 __attribute__((unused)) = {
-    .name = "PAL_1997",
+// ---------------------------------------------------------------------------
+// PAL 1997 Presets
+// ---------------------------------------------------------------------------
+
+static const preset_t preset_pal_1997_int __attribute__((unused)) = {
+    .name = "PAL_1997_INT",
+
+    .fvi_num = 49656530LL,
+    .fvi_den = 1LL,
+
+    .s_progressive = 626,
+    .s_interlaced  = 625,
+    .default_s     = 625,
+
+    .default_h_total = 3178,
+    .default_pat     = 23,
+    .default_leap_a  = 3182,
+    .default_leap_b  = 3184,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 20,
+};
+
+static const preset_t preset_pal_1997_prog __attribute__((unused)) = {
+    .name = "PAL_1997_PROG",
 
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
@@ -204,8 +240,35 @@ static const preset_t preset_pal_1997 __attribute__((unused)) = {
     .safe_y = 20,
 };
 
-static const preset_t preset_pal60 __attribute__((unused)) = {
-    .name = "PAL60",
+// ---------------------------------------------------------------------------
+// PAL60 Presets
+// ---------------------------------------------------------------------------
+
+static const preset_t preset_pal60_int __attribute__((unused)) = {
+    .name = "PAL60_INT",
+
+    .fvi_num = 49656530LL,
+    .fvi_den = 1LL,
+
+    .s_progressive = 526,
+    .s_interlaced  = 525,
+    .default_s     = 525,
+
+    .default_h_total = 3156,
+    .default_pat     = 0,
+    .default_leap_a  = 3156,
+    .default_leap_b  = 3156,
+
+    .resolution = RESOLUTION_320x240,
+    .fb_width   = 320,
+    .fb_height  = 240,
+
+    .safe_x = 20,
+    .safe_y = 20,
+};
+
+static const preset_t preset_pal60_prog __attribute__((unused)) = {
+    .name = "PAL60_PROG",
 
     .fvi_num = 49656530LL,
     .fvi_den = 1LL,
@@ -231,41 +294,37 @@ static const preset_t preset_pal60 __attribute__((unused)) = {
 // Active preset selection
 // ---------------------------------------------------------------------------
 
-#if defined(PRESET_MPAL_MATH)
-    #define ACTIVE_PRESET preset_mpal_math
-#elif defined(PRESET_MPAL_OLD)
-    #define ACTIVE_PRESET preset_mpal_old
-#elif defined(PRESET_MPAL_PREVIEW)
-    #define ACTIVE_PRESET preset_mpal_preview
+#if defined(PRESET_MPAL_PROG)
+    #define ACTIVE_PRESET preset_mpal_prog
 #elif defined(PRESET_MPAL_INT)
     #define ACTIVE_PRESET preset_mpal_int
-#elif defined(PRESET_PAL_1996)
-    #define ACTIVE_PRESET preset_pal_1996
-#elif defined(PRESET_PAL_1997)
-    #define ACTIVE_PRESET preset_pal_1997
-#elif defined(PRESET_PAL60)
-    #define ACTIVE_PRESET preset_pal60
+
+#elif defined(PRESET_NTSC_INT)
+    #define ACTIVE_PRESET preset_ntsc_int
+#elif defined(PRESET_NTSC_PROG)
+    #define ACTIVE_PRESET preset_ntsc_prog
+
+#elif defined(PRESET_PAL_1996_INT)
+    #define ACTIVE_PRESET preset_pal_1996_int
+#elif defined(PRESET_PAL_1996_PROG)
+    #define ACTIVE_PRESET preset_pal_1996_prog
+
+#elif defined(PRESET_PAL_1997_INT)
+    #define ACTIVE_PRESET preset_pal_1997_int
+#elif defined(PRESET_PAL_1997_PROG)
+    #define ACTIVE_PRESET preset_pal_1997_prog
+
+#elif defined(PRESET_PAL60_INT)
+    #define ACTIVE_PRESET preset_pal60_int
+#elif defined(PRESET_PAL60_PROG)
+    #define ACTIVE_PRESET preset_pal60_prog
+
 #else
-    #define ACTIVE_PRESET preset_ntsc
+    #error "No VI preset defined"
 #endif
 
 static const preset_t *preset = &ACTIVE_PRESET;
 
-// ---------------------------------------------------------------------------
-// MPAL-only: restore V_BURST for progressive modes to prevent color breakage
-// when switching back from interlaced.
-// ---------------------------------------------------------------------------
-
-#if defined(PRESET_MPAL_MATH) || defined(PRESET_MPAL_OLD) || \
-    defined(PRESET_MPAL_PREVIEW) || defined(PRESET_MPAL_INT)
-static inline void restore_progressive_vburst(void)
-{
-    *REG_VI_V_BURST = 0x000e0204;
-}
-#endif
-
-// ---------------------------------------------------------------------------
-// Write VI timing registers directly.
 // ---------------------------------------------------------------------------
 
 static void sanitize_timing(int *h_total, int *pat, int *leap_a, int *leap_b)
@@ -303,12 +362,6 @@ static void apply_vi_timing(int h_total, int pat, int leap_a, int leap_b, int s)
         ctrl &= ~(1u << 6);
 
     *REG_VI_CTRL = ctrl;
-
-#if defined(PRESET_MPAL_MATH) || defined(PRESET_MPAL_OLD) || \
-    defined(PRESET_MPAL_PREVIEW) || defined(PRESET_MPAL_INT)
-    if (s % 2 == 0)
-        restore_progressive_vburst();
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -402,8 +455,6 @@ static void draw_overlay(
     uint32_t reg_vt   = *REG_VI_V_TOTAL;
     uint32_t reg_ht   = *REG_VI_H_TOTAL;
     uint32_t reg_leap = *REG_VI_H_TOTAL_LEAP;
-    uint32_t reg_vb   = *REG_VI_V_BURST;
-    uint32_t reg_vc   = *REG_VI_CURRENT;
 
     int y = preset->safe_y;
 
@@ -413,17 +464,21 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
-    graphics_draw_text(disp, preset->safe_x + 54, y, buf);
-    y += 24;
-
-// ---------------------------------------------------------------------------
-
-    snprintf(buf, sizeof(buf), "     H_TOTAL: %d", h_total);
+    snprintf(buf, sizeof(buf), "        VI TIMING TEST");
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP PATTERN: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), "       PRESET: %s", preset->name);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 30;
+
+// ---------------------------------------------------------------------------
+
+    snprintf(buf, sizeof(buf), "      H_TOTAL: %d", h_total);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 12;
+
+    snprintf(buf, sizeof(buf), " LEAP PATTERN: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -433,59 +488,44 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "      LEAP_A: %d  deltaA: +%d", leap_a, t.delta_a);
+    snprintf(buf, sizeof(buf), "       LEAP_A: %d  deltaA: +%d", leap_a, t.delta_a);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "      LEAP_B: %d  deltaB: +%d", leap_b, t.delta_b);
+    snprintf(buf, sizeof(buf), "       LEAP_B: %d  deltaB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "   avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
+    snprintf(buf, sizeof(buf), "    avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "REFRESH (fV): %.7f Hz", t.fv);
+    snprintf(buf, sizeof(buf), " REFRESH (fV): %.7f Hz", t.fv);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "   LINE (fH): %.4f Hz", t.fh);
+    snprintf(buf, sizeof(buf), "    LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
-//    const char *tv_names[] = {"PAL", "NTSC", "MPAL"};
-//    snprintf(buf, sizeof(buf), "     TV TYPE: %s", tv_names[get_tv_type()]);
-//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-//    y += 16;
-
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), " REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
+    snprintf(buf, sizeof(buf), "  REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), " REG H_TOTAL: 0x%08lX", (unsigned long)reg_ht);
+    snprintf(buf, sizeof(buf), "  REG H_TOTAL: 0x%08lX", (unsigned long)reg_ht);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
+    snprintf(buf, sizeof(buf), "     REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 48;
-
-//    snprintf(buf, sizeof(buf), " REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
-//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-//    y += 12;
-
-//    snprintf(buf, sizeof(buf), " REG_CURRENT: 0x%08lx", (unsigned long)reg_vc);
-//    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-//    y += 20;
+    y += 26;
 
 // ---------------------------------------------------------------------------
 
-//    graphics_draw_text(disp, preset->safe_x + 10, y, " L/R:  PROGRESSIVE / INTERLACED ");
-//    y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD U/D: H_TOTAL  C U/D: LEAP_A");
     y += 12;
     graphics_draw_text(disp, preset->safe_x + 10, y, "DPAD L/R: PATTERN  C L/R: LEAP_B");
@@ -540,7 +580,8 @@ int main(void)
         ANTIALIAS_RESAMPLE_FETCH_ALWAYS
     );
 
-#if defined(PRESET_PAL_1996) || defined(PRESET_PAL_1997)
+#if defined(PRESET_PAL_1996_INT) || defined(PRESET_PAL_1996_PROG) || \
+    defined(PRESET_PAL_1997_INT) || defined(PRESET_PAL_1997_PROG)
     // Reposition active video window for PAL frame timing.
     // libdragon initializes VI_V_VIDEO for NTSC blanking (V_START=0x025).
     // PAL blanking ends later (V_START=0x05F); without this correction the
@@ -578,8 +619,6 @@ int main(void)
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-//        if (keys.l)       { s = preset->s_progressive; changed = true; }
-//        if (keys.r)       { s = preset->s_interlaced;  changed = true; }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);

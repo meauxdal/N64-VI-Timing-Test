@@ -11,14 +11,17 @@ jobs:
     strategy:
       matrix:
         preset:
-          - NTSC
-          - MPAL_MATH
-          - MPAL_OLD
-          - MPAL_PREVIEW
+
           - MPAL_INT
-          - PAL_1996
-          - PAL_1997
-          - PAL60
+          - MPAL_PROG
+          - NTSC_INT
+          - NTSC_PROG
+          - PAL_1996_INT
+          - PAL_1996_PROG
+          - PAL_1997_INT
+          - PAL_1997_PROG
+          - PAL60_INT
+          - PAL60_PROG
 
     env:
       N64_INST: /n64_toolchain
