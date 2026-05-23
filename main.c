@@ -583,7 +583,8 @@ int main(void)
         ANTIALIAS_RESAMPLE_FETCH_ALWAYS
     );
 
-#if defined(PRESET_PAL_1996) || defined(PRESET_PAL_1997)
+#if defined(PRESET_PAL_1996_INT) || defined(PRESET_PAL_1996_PROG) || \
+    defined(PRESET_PAL_1997_INT) || defined(PRESET_PAL_1997_PROG)
     // Reposition active video window for PAL frame timing.
     // libdragon initializes VI_V_VIDEO for NTSC blanking (V_START=0x025).
     // PAL blanking ends later (V_START=0x05F); without this correction the
