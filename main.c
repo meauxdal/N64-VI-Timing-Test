@@ -413,9 +413,13 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "VI TIMING TEST [%s]", preset->name);
-    graphics_draw_text(disp, preset->safe_x + 54, y, buf);
-    y += 24;
+    snprintf(buf, sizeof(buf), "        VI TIMING TEST");
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 12;
+
+    snprintf(buf, sizeof(buf), "         %s", preset->name);
+    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
+    y += 12;
 
 // ---------------------------------------------------------------------------
 
@@ -472,7 +476,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 48;
+    y += 26;
 
 //    snprintf(buf, sizeof(buf), " REG V_BURST: 0x%08lX", (unsigned long)reg_vb);
 //    graphics_draw_text(disp, preset->safe_x + 16, y, buf);
