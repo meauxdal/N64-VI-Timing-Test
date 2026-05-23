@@ -2,7 +2,7 @@
 
 [![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
 
-![NTSC](NTSC-v2.0.png)
+![image of the tool, NTSC-v3.0.0. rainbow test pattern background with black text showing the timing registers](NTSC-v3.0.0.png)
 
 this tool allows adjusting VI timing values in real time to observe hardware effects. in particular, the initial goal is to be able to quickly iterate appropriate presets for MPAL
 
