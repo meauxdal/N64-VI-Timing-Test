@@ -3,14 +3,14 @@
 
 // VI register addresses (uncached KSEG1) ------------------------------------
 #define VI_BASE             0xA4400000
+#define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
+#define REG_VI_V_BURST      ((volatile uint32_t*)(VI_BASE + 0x0C))
+#define REG_VI_CURRENT      ((volatile uint32_t*)(VI_BASE + 0x10))
 #define REG_VI_V_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x18))
 #define REG_VI_H_TOTAL      ((volatile uint32_t*)(VI_BASE + 0x1C))
 #define REG_VI_H_TOTAL_LEAP ((volatile uint32_t*)(VI_BASE + 0x20))
 #define REG_VI_V_VIDEO      ((volatile uint32_t*)(VI_BASE + 0x28))
-#define REG_VI_CTRL         ((volatile uint32_t*)(VI_BASE + 0x00))
 #define REG_VI_Y_SCALE      ((volatile uint32_t*)(VI_BASE + 0x34))
-#define REG_VI_V_BURST      ((volatile uint32_t*)(VI_BASE + 0x0C))
-#define REG_VI_CURRENT      ((volatile uint32_t*)(VI_BASE + 0x10))
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -413,21 +413,21 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "        VI TIMING TEST");
+    snprintf(buf, sizeof(buf), "       VI TIMING TEST");
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "         %s", preset->name);
+    snprintf(buf, sizeof(buf), "      %s", preset->name);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "     H_TOTAL: %d", h_total);
+    snprintf(buf, sizeof(buf), "      H_TOTAL: %d", h_total);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "LEAP PATTERN: %d (0b%c%c%c%c%c)",
+    snprintf(buf, sizeof(buf), " LEAP PATTERN: %d (0b%c%c%c%c%c)",
         pat,
         (pat >> 4) & 1 ? '1' : '0',
         (pat >> 3) & 1 ? '1' : '0',
@@ -437,25 +437,25 @@ static void draw_overlay(
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "      LEAP_A: %d  deltaA: +%d", leap_a, t.delta_a);
+    snprintf(buf, sizeof(buf), "       LEAP_A: %d  deltaA: +%d", leap_a, t.delta_a);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "      LEAP_B: %d  deltaB: +%d", leap_b, t.delta_b);
+    snprintf(buf, sizeof(buf), "       LEAP_B: %d  deltaB: +%d", leap_b, t.delta_b);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "   avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
+    snprintf(buf, sizeof(buf), "    avg/VSYNC: %d.%d clk", t.avg_whole, t.avg_tenths);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), "REFRESH (fV): %.7f Hz", t.fv);
+    snprintf(buf, sizeof(buf), " REFRESH (fV): %.7f Hz", t.fv);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "   LINE (fH): %.4f Hz", t.fh);
+    snprintf(buf, sizeof(buf), "    LINE (fH): %.4f Hz", t.fh);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 16;
 
@@ -466,15 +466,15 @@ static void draw_overlay(
 
 // ---------------------------------------------------------------------------
 
-    snprintf(buf, sizeof(buf), " REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
+    snprintf(buf, sizeof(buf), "  REG V_TOTAL: 0x%08lX", (unsigned long)reg_vt);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), " REG H_TOTAL: 0x%08lX", (unsigned long)reg_ht);
+    snprintf(buf, sizeof(buf), "  REG H_TOTAL: 0x%08lX", (unsigned long)reg_ht);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 12;
 
-    snprintf(buf, sizeof(buf), "    REG LEAP: 0x%08lX", (unsigned long)reg_leap);
+    snprintf(buf, sizeof(buf), "     REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
     y += 26;
 
