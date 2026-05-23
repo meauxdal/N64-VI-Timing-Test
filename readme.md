@@ -10,6 +10,25 @@ see https://github.com/DragonMinded/libdragon/issues/884 for more details.
 
 ---
 
+this tool works very similarly to the [VI timing calculator](https://meauxdal.neocities.org/n64-vi-calculator). you can adjust VI registers dynamically and see the results:
+
+- d-pad up & down: increases or decreases VI_H_TOTAL
+- d-pad right & left: increases or decreases the leap pattern (0-31)
+- c-up & c-down: increases or decreases LEAP_A
+- c-right & c-left: increases or decreases LEAP_B
+
+LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas.
+
+---
+
+- INT: interlaced
+- PROG: progressive
+- PAL_1996: original PAL leap configuration
+- PAL_1997: revised PAL leap configuration
+- PAL60: NTSC lines/timing with PAL color
+
+---
+
 initial testing shows promise with the following profiles, per N64brew Discord PAL-M tester AAIC:
 
 **MPAL_PROG (progressive):**  
@@ -36,22 +55,3 @@ H_TOTAL: 772.75
 Pattern: 0b00000  
 LEAP_A: 774.00  
 LEAP_B: 774.00  
-
----
-
-this tool works very similarly to the [VI timing calculator](https://meauxdal.neocities.org/n64-vi-calculator). you can adjust VI registers dynamically and see the results:
-
-- d-pad up & down: increases or decreases VI_H_TOTAL
-- d-pad right & left: increases or decreases the leap pattern (0-31)
-- c-up & c-down: increases or decreases LEAP_A
-- c-right & c-left: increases or decreases LEAP_B
-
-LEAP_A/B are clamped to >= VI_H_TOTAL as this tool is not intended to explore negative leap deltas.
-
----
-
-- INT: interlaced
-- PROG: progressive
-- PAL_1996: original PAL leap configuration
-- PAL_1997: revised PAL leap configuration
-- PAL60: NTSC lines/timing with PAL color
