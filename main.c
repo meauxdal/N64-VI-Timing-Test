@@ -141,7 +141,7 @@ static const preset_t preset_ntsc_prog __attribute__((unused)) = {
 };
 
 // ---------------------------------------------------------------------------
-// PAL96 Presets
+// PAL 1996 Presets
 // ---------------------------------------------------------------------------
 
 static const preset_t preset_pal_1996_int __attribute__((unused)) = {
@@ -191,7 +191,7 @@ static const preset_t preset_pal_1996_prog __attribute__((unused)) = {
 };
 
 // ---------------------------------------------------------------------------
-// PAL97 Presets
+// PAL 1997 Presets
 // ---------------------------------------------------------------------------
 
 static const preset_t preset_pal_1997_int __attribute__((unused)) = {
@@ -267,7 +267,6 @@ static const preset_t preset_pal60_int __attribute__((unused)) = {
     .safe_y = 20,
 };
 
-
 static const preset_t preset_pal60_prog __attribute__((unused)) = {
     .name = "PAL60_PROG",
 
@@ -291,11 +290,9 @@ static const preset_t preset_pal60_prog __attribute__((unused)) = {
     .safe_y = 20,
 };
 
-
 // ---------------------------------------------------------------------------
 // Active preset selection
 // ---------------------------------------------------------------------------
-
 
 #if defined(PRESET_MPAL_PROG)
     #define ACTIVE_PRESET preset_mpal_prog
@@ -622,8 +619,6 @@ int main(void)
         if (keys.c_down)  { leap_a--;  changed = true; }
         if (keys.c_right) { leap_b++;  changed = true; }
         if (keys.c_left)  { leap_b--;  changed = true; }
-//        if (keys.l)       { s = preset->s_progressive; changed = true; }
-//        if (keys.r)       { s = preset->s_interlaced;  changed = true; }
 
         if (changed) {
             sanitize_timing(&h_total, &pat, &leap_a, &leap_b);
