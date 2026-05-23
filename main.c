@@ -470,7 +470,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "       PRESET: %s", preset->name);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 16;
+    y += 24;
 
 // ---------------------------------------------------------------------------
 
@@ -522,7 +522,7 @@ static void draw_overlay(
 
     snprintf(buf, sizeof(buf), "     REG LEAP: 0x%08lX", (unsigned long)reg_leap);
     graphics_draw_text(disp, preset->safe_x + 16, y, buf);
-    y += 40;
+    y += 32;
 
 // ---------------------------------------------------------------------------
 
