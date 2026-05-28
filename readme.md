@@ -1,6 +1,6 @@
-## VI timing test ROM for N64
-
 [![Build N64 ROM](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml/badge.svg)](https://github.com/meauxdal/N64-VI-Timing-Test/actions/workflows/build.yml)
+
+## VI timing test ROM for N64
 
 ![image of the tool, NTSC progressive, version 3 point 0 point 0. rainbow test pattern background with black UI text](NTSC-v3.0.0.png)
 
@@ -28,7 +28,7 @@ that said, you *can* use this to observe the handling of various timings with yo
 
 ## controls
 
-this tool works very similarly to the [VI timing calculator](https://meauxdal.neocities.org/n64-vi-calculator). you can adjust VI registers dynamically and see the results:
+this tool works very similarly to the [VI timing calculator](https://meauxdal.neocities.org/n64-vi-calculator). adjust VI registers to observe the results of timing changes:
 
 - d-pad up & down: increases or decreases VI_H_TOTAL
 - d-pad right & left: increases or decreases the leap pattern (0-31)
